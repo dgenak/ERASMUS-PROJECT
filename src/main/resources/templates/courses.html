@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="el"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Meta tags για CSRF (θα αντικατασταθούν από το Thymeleaf) -->
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+  <title>ΟΠΑ - ERASMUS | Μαθήματα</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap" rel="stylesheet">
+  <!-- Εξωτερικό αρχείο CSS (styles.css πρέπει να βρίσκεται στο src/main/resources/static/css) -->
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+  <style>
+    /* Επιπλέον styling για τον τίτλο */
+    .header-title {
+      font-size: 64px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7);
+      animation: fadeInZoom 1.5s ease-out;
+      transition: transform 0.3s ease;
+    }
+    .header-title:hover {
+      transform: scale(1.05);
+    }
+    @keyframes fadeInZoom {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    
+    /* ========== Βασικό Styling ========== */
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #ece9e6, #ffffff);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      line-height: 1.6;
+      transition: background 0.5s ease;
+    }
+    header {
+      background: linear-gradient(135deg, #003366, #00509e);
+      color: #fff;
+      padding: 25px 15px;
+      text-align: center;
+      font-size: 36px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      letter-spacing: 1px;
+      position: relative;
+    }
+    .auth-links {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 16px;
+    }
+    .auth-links a {
+      color: #fff;
+      text-decoration: none;
+      margin-right: 10px;
+    }
+    /* Εμφάνιση του username πάνω αριστερά */
+    .profile-info {
+      position: absolute;
+      top: 25px;
+      left: 25px;
+      font-size: 16px;
+    }
+    .profile-info a {
+      color: #fff;
+      text-decoration: none;
+    }
+    nav {
+      background-color: #00509e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    }
+    .nav-item {
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 24px;
+      margin: 0 10px;
+      font-size: 18px;
+      border-radius: 30px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    .nav-item:hover {
+      background-color: #0073e6;
+      transform: scale(1.05);
+    }
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #fff;
+      min-width: 260px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+      z-index: 1;
+      left: 0;
+      top: 100%;
+      border-radius: 6px;
+      overflow: hidden;
+      animation: fadeIn 0.3s ease;
+    }
+    .dropdown-content a {
+      color: #003366;
+      padding: 14px 20px;
+      display: block;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+    .dropdown-content a:hover {
+      background-color: #eaf2ff;
+    }
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 40px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      animation: fadeIn 0.5s ease;
+    }
+    /* Styling για τα μαθήματα (grid εξάμηνων) */
+    .university-name {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 30px;
+      color: #003366;
+    }
+    .semesters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    .semester {
+      width: 250px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .semester h3 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #00509e;
+    }
+    .course-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .course-list li {
+      padding: 5px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .course-list li:last-child {
+      border-bottom: none;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    /* Styling για τα modals */
+    #forumModalOverlay, #infoModalOverlay, #profileModalOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+    }
+    #forumModal, #infoModal, #profileModal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      z-index: 1000;
+      display: none;
+      width: 90%;
+      max-width: 600px;
+    }
+    /* Sidebar όπως στο index (ακριβώς ίδιο) */
+    #mySidebar {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      top: 0;
+      right: 0;
+      background-color: #f9f9f9;
+      box-shadow: -3px 0 10px rgba(0,0,0,0.2);
+      overflow-x: hidden;
+      transition: 0.3s;
+      padding-top: 60px;
+      z-index: 999;
+    }
+    #mySidebar.open {
+      width: 320px;
+    }
+    .closebtn {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      font-size: 36px;
+      text-decoration: none;
+      color: #333;
+      cursor: pointer;
+    }
+    .openbtn {
+      position: fixed;
+      top: 355px;
+      right: 25px;
+      background: linear-gradient(135deg, #003366, #00509e);
+      color: #fff;
+      padding: 10px 16px;
+      font-size: 25px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      z-index: 800;
+    }
+    .openbtn:hover {
+      background-color: #0073e6;
+    }
+    /* Στυλ για το ημερολόγιο στο Sidebar */
+    .calendar-container {
+      text-align: center;
+      padding: 20px;
+    }
+    .calendar-title {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #003366;
+    }
+    table.calendar {
+      margin: 0 auto;
+      border-collapse: collapse;
+      width: 90%;
+      max-width: 250px;
+    }
+    table.calendar th {
+      background-color: #0073e6;
+      color: #fff;
+      padding: 5px;
+      text-align: center;
+    }
+    table.calendar td {
+      border: 1px solid #ddd;
+      text-align: center;
+      padding: 8px;
+      cursor: pointer;
+    }
+    table.calendar td:hover {
+      background-color: #f0f0f0;
+    }
+    /* Επιλογές στο Sidebar */
+    .sidebar-buttons {
+      padding: 20px;
+      text-align: center;
+    }
+    .sidebar-buttons button {
+      display: block;
+      margin: 10px auto;
+      width: 90%;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 25px;
+      background-color: #00509e;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    .sidebar-buttons button:hover {
+      background-color: #0073e6;
+      transform: scale(1.02);
+    }
+    
+    footer {
+      text-align: center;
+      padding: 20px 0;
+      background: #003366;
+      color: #fff;
+      margin-top: auto;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body onload="showCourses()">
+  <header>
+    <!-- Αν δεν είναι συνδεδεμένος ο χρήστης -->
+    <div class="auth-links" sec:authorize="!isAuthenticated()">
+      <a th:href="@{/login}">Log In</a>
+      <a th:href="@{/register}">Sign In</a>
+    </div>
+    <!-- Εάν ο χρήστης είναι συνδεδεμένος, εμφανίζεται το displayName (πάνω αριστερά) -->
+    <div class="profile-info" sec:authorize="isAuthenticated()">
+      <a th:href="@{/profile}" style="color: #fff; text-decoration: none;">
+        <span sec:authentication="principal.displayName">Χρήστης</span>
+      </a>
+    </div>
+    <h1 class="header-title">Eropa</h1>
+    <!-- Κουμπί toggle του Sidebar -->
+    <button class="openbtn" onclick="toggleSidebar()">☰</button>
+  </header>
+  
+  <nav>
+    <a th:href="@{/}" class="nav-item" onclick="showHome()">ΑΡΧΙΚΗ</a>
+    <div class="dropdown">
+      <a href="#" class="nav-item">ΤΜΗΜΑΤΑ</a>
+      <div class="dropdown-content">
+        <a href="#" onclick="showDepartment('Οικονομικής Επιστήμης')">Οικονομικής Επιστήμης</a>
+        <a href="#" onclick="showDepartment('Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών')">Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών</a>
+        <a href="#" onclick="showDepartment('Διοικητικής Επιστήμης και Τεχνολογίας')">Διοικητικής Επιστήμης και Τεχνολογίας</a>
+        <a href="#" onclick="showDepartment('Οργάνωσης και Διοίκησης Επιχειρήσεων')">Οργάνωσης και Διοίκησης Επιχειρήσεων</a>
+        <a href="#" onclick="showDepartment('Μάρκετινγκ και Επικοινωνίας')">Μάρκετινγκ και Επικοινωνίας</a>
+        <a href="#" onclick="showDepartment('Στατιστικής')">Στατιστικής</a>
+        <a href="#" onclick="showDepartment('Πληροφορικής')">Πληροφορικής</a>
+      </div>
+    </div>
+    <a href="#" class="nav-item" onclick="showApplication()">ΑΙΤΗΣΕΙΣ</a>
+  </nav>
+  
+  <!-- Container για τα μαθήματα -->
+  <div class="container" id="content">
+    <!-- Εμφάνιση του ονόματος του Πανεπιστημίου -->
+    <div class="university-name" th:text="${university}">Όνομα Πανεπιστημίου</div>
+    <!-- Grid 8 εξάμηνων με τα μαθήματα -->
+    <div class="semesters">
+      <div class="semester">
+        <h3>Εξάμηνο 1</h3>
+        <ul class="course-list">
+          <li>Μάθημα 1</li>
+          <li>Μάθημα 2</li>
+          <li>Μάθημα 3</li>
+        </ul>
+      </div>
+      <div class="semester">
+        <h3>Εξάμηνο 2</h3>
+        <ul class="course-list">
+          <li>Μάθημα 1</li>
+          <li>Μάθημα 2</li>
+          <li>Μάθημα 3</li>
+        </ul>
+      </div>
+      <div class="semester">
+        <h3>Εξάμηνο 3</h3>
+        <ul class="course-list">
+          <li>Μάθημα 1</li>
+          <li>Μάθημα 2</li>
+          <li>Μάθημα 3</li>
+        </ul>
+      </div>
+      <div class="semester">
+        <h3>Εξάμηνο 4</h3>
+        <ul class="course-list">
+          <li>Μάθημα 1</li>
+          <li>Μάθημα 2</li>
+          <li>Μάθημα 3</li>
+        </ul>
+      </div>
+      <div class="semester">
+        <h3>Εξάμηνο 5</h3>
+        <ul class="course-list">
+          <li>Μάθημα 1</li>
+          <li>Μάθημα 2</li>
+          <li>Μάθημα 3</li>
+        </ul>
+      </div>
+      <div class="semester">
+        <h3>Εξάμηνο 6</h3>
+        <ul class="course-list">
+          <li>Μάθημα 1</li>
+          <li>Μάθημα 2</li>
+          <li>Μάθημα 3</li>
+        </ul>
+      </div>
+      <div class="semester">
+        <h3>Εξάμηνο 7</h3>
+        <ul class="course-list">
+          <li>Μάθημα 1</li>
+          <li>Μάθημα 2</li>
+          <li>Μάθημα 3</li>
+        </ul>
+      </div>
+      <div class="semester">
+        <h3>Εξάμηνο 8</h3>
+        <ul class="course-list">
+          <li>Μάθημα 1</li>
+          <li>Μάθημα 2</li>
+          <li>Μάθημα 3</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Sidebar όπως στο αρχικό index -->
+  <div id="mySidebar" class="sidebar">
+    <span class="closebtn" onclick="toggleSidebar()">&times;</span>
+    <div class="calendar-container">
+      <div class="calendar-title">March 2025</div>
+      <table class="calendar">
+        <thead>
+          <tr>
+            <th>M</th>
+            <th>T</th>
+            <th>W</th>
+            <th>T</th>
+            <th>F</th>
+            <th>S</th>
+            <th>S</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td>
+          </tr>
+          <tr>
+            <td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td>
+          </tr>
+          <tr>
+            <td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td>
+          </tr>
+          <tr>
+            <td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td>
+          </tr>
+          <tr>
+            <td>29</td><td>30</td><td>31</td><td></td><td></td><td></td><td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- ΝΕΕΣ Επιλογές στο Sidebar -->
+    <div class="sidebar-buttons" style="padding: 20px; text-align: center;">
+      <button onclick="openProfileModal()" style="display: block; margin: 10px auto; width: 90%;">Το προφίλ μου</button>
+      <button onclick="redirectToDeclarations()" style="display: block; margin: 10px auto; width: 90%;">Οι δηλώσεις μου</button>
+      <button onclick="redirectToSettings()" style="display: block; margin: 10px auto; width: 90%;">Ρυθμίσεις</button>
+      <button onclick="signOut()" style="display: block; margin: 10px auto; width: 90%;">Sign out</button>
+    </div>
+  </div>
+  
+  <footer>
+    <p>&copy; 2025 Οικονομικό Πανεπιστήμιο Αθηνών</p>
+  </footer>
+  
+  <script>
+    // Ανάκτηση CSRF τιμών
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
+
+    // Dummy συνάρτηση φόρτωσης της σελίδας μαθημάτων
+    function showCourses() {
+      console.log("Σελίδα μαθημάτων φορτώθηκε");
+    }
+    
+    // Συνάρτηση για toggle του Sidebar (όπως στο index)
+    function toggleSidebar() {
+      const sidebar = document.getElementById("mySidebar");
+      if (sidebar.classList.contains("open")) {
+        sidebar.classList.remove("open");
+      } else {
+        sidebar.classList.add("open");
+      }
+    }
+    
+    // Διορθωμένες συναρτήσεις για το menu:
+    function showDepartment(dept) {
+      // Ανακατεύθυνση στη σελίδα των τμημάτων με το επιλεγμένο τμήμα ως παράμετρο
+      window.location.href = "/departments?department=" + encodeURIComponent(dept);
+    }
+    function showApplication() {
+      // Ανακατεύθυνση στη σελίδα αιτήσεων
+      window.location.href = "/applications";
+    }
+    
+    // Dummy συναρτήσεις για τις μεταβάσεις και τα modals
+    function showHome() { window.location.href = "/"; }
+    function closeForumModal() {
+      document.getElementById("forumModal").style.display = "none";
+      document.getElementById("forumModalOverlay").style.display = "none";
+    }
+    function closeUniversityInfoModal() {
+      document.getElementById("infoModal").style.display = "none";
+      document.getElementById("infoModalOverlay").style.display = "none";
+    }
+    function showCommentsInInfoModal() { /* ... */ }
+    function submitForumPost() { /* ... */ }
+    function openCoursesPage() { window.location.href = "/courses"; }
+    function openProfileModal() {
+      document.getElementById("profileModal").style.display = "block";
+      document.getElementById("profileModalOverlay").style.display = "block";
+    }
+    function closeProfileModal() {
+      document.getElementById("profileModal").style.display = "none";
+      document.getElementById("profileModalOverlay").style.display = "none";
+    }
+    function saveProfile() { /* ... */ }
+    function redirectToDeclarations() { window.location.href = "/declarations"; }
+    function redirectToSettings() { window.location.href = "/settings"; }
+    function signOut() { window.location.href = "/login"; }
+  </script>
+</body>
+</html>

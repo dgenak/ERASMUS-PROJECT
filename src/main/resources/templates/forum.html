@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="el"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Meta tags για CSRF -->
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+  <title>ERASMUS FORUM</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap" rel="stylesheet">
+  <!-- Εξωτερικό αρχείο CSS -->
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+
+  <style>
+    /* Κρατήστε εδώ το υπάρχον CSS για header, nav, container και sidebar όπως στα άλλα templates */
+    /* ... (π.χ. το ίδιο CSS από το index.html για header, nav, sidebar, footer, κλπ.) ... */
+
+    /* --- Styling για το ERASMUS FORUM --- */
+    .forum-container {
+      margin-top: 20px;
+    }
+    .forum-post {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .post-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+    .post-user {
+      font-weight: bold;
+    }
+    .post-timestamp {
+      font-style: italic;
+    }
+    .post-title h3 {
+      margin: 0 0 10px 0;
+      color: #003366;
+    }
+    .post-body {
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+    .post-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .like-button {
+      width: 40px;
+      height: 40px;
+      border: none;
+      cursor: pointer;
+      outline: none;
+      /* SVG που δείχνει περίγραμμα καρδιάς (stroke=black) */
+      background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIj48cGF0aCBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIGQ9Ik0xMi43NiAzLjM2Yy0xLjYxLTEuMzItNC4xLTEuMi01LjY0LjI3LTEuNjUgMS41Ny0xLjggNC4xLS4zIDUuODhsNS4xOCA1LjY3IDUuMTgtNS42N2MxLjUtMS43OCAxLjM1LTQuMzEtLjMtNS44OC0xLjU0LTEuNDctNC4wMy0xLjU5LTUuNjQuMjd6Ii8+PC9zdmc+") center center / contain no-repeat;
+    }
+    .like-button.liked {
+      background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIj48cGF0aCBmaWxsPSJyZWQiIHN0cm9rZT0icmVkIiBzdHJva2Utd2lkdGg9IjIiIGQ9Ik0xMi43NiAzLjM2Yy0xLjYxLTEuMzItNC4xLTEuMi01LjY0LjI3LTEuNjUgMS41Ny0xLjggNC4xLS4zIDUuODhsNS4xOCA1LjY3IDUuMTgtNS42N2MxLjUtMS43OCAxLjM1LTQuMzEtLjMtNS44OC0xLjU0LTEuNDctNC4wMy0xLjU5LTUuNjQuMjd6Ii8+PC9zdmc+") center center / contain no-repeat;
+    }
+    .reply-button {
+      padding: 8px 16px;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      font-size: 14px;
+    }
+    .reply-button:hover {
+      background: #e0e0e0;
+    }
+    /* Τα υπόλοιπα CSS (για modal, sidebar, footer κλπ.) παραμένουν αμετάβλητα */
+  </style>
+</head>
+<body>
+  <!-- Header (όπως στο index) -->
+  <header>
+    <div class="auth-links" sec:authorize="!isAuthenticated()">
+      <a th:href="@{/login}">Log In</a>
+      <a th:href="@{/register}">Sign In</a>
+    </div>
+    <div class="profile-info" sec:authorize="isAuthenticated()">
+      <a th:href="@{/profile}" style="color: #fff; text-decoration: none;">
+        <span sec:authentication="principal.displayName">Χρήστης</span>
+      </a>
+    </div>
+    <h1 class="header-title">Eropa</h1>
+    <button class="openbtn" onclick="toggleSidebar()">☰</button>
+  </header>
+
+  <!-- Navigation Menu (όπως στο index) -->
+  <nav>
+    <a th:href="@{/}" class="nav-item" onclick="showHome()">ΑΡΧΙΚΗ</a>
+    <div class="dropdown">
+      <a href="#" class="nav-item">ΤΜΗΜΑΤΑ</a>
+      <div class="dropdown-content">
+        <a href="#" onclick="showDepartment('Οικονομικής Επιστήμης')">Οικονομικής Επιστήμης</a>
+        <a href="#" onclick="showDepartment('Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών')">Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών</a>
+        <a href="#" onclick="showDepartment('Διοικητικής Επιστήμης και Τεχνολογίας')">Διοικητικής Επιστήμης και Τεχνολογίας</a>
+        <a href="#" onclick="showDepartment('Οργάνωσης και Διοίκησης Επιχειρήσεων')">Οργάνωσης και Διοίκησης Επιχειρήσεων</a>
+        <a href="#" onclick="showDepartment('Μάρκετινγκ και Επικοινωνίας')">Μάρκετινγκ και Επικοινωνίας</a>
+        <a href="#" onclick="showDepartment('Στατιστικής')">Στατιστικής</a>
+        <a href="#" onclick="showDepartment('Πληροφορικής')">Πληροφορικής</a>
+      </div>
+    </div>
+    <!-- Το νέο κουμπί ERASMUS FORUM -->
+    <a th:href="@{/forum}" class="nav-item">ERASMUS FORUM</a>
+    <a href="#" class="nav-item" onclick="showApplication()">ΑΙΤΗΣΕΙΣ</a>
+  </nav>
+
+  <!-- Container για το περιεχόμενο του forum -->
+  <div class="container" id="content">
+    <h2>ERASMUS FORUM</h2>
+
+    <!-- Φόρμα για υποβολή νέου post -->
+    <div class="new-post">
+      <form th:action="@{/forum}" method="post">
+        <textarea name="message" placeholder="Γράψε την ερώτησή σου ή την εμπειρία σου εδώ..." required></textarea>
+        <br>
+        <button type="submit">Αποστολή</button>
+      </form>
+    </div>
+
+    <!-- Εμφάνιση των posts με το νέο layout -->
+    <div class="forum-container">
+      <div th:each="post : ${posts}" class="forum-post">
+        <div class="post-header">
+          <span class="post-user" th:text="${post.username}">Username</span>
+          <span class="post-timestamp" th:text="${#dates.format(post.timestamp, 'dd/MM/yyyy HH:mm')}">Ημερομηνία</span>
+        </div>
+        <div class="post-content">
+          <div class="post-title" th:if="${post.title != null}">
+            <h3 th:text="${post.title}">Τίτλος</h3>
+          </div>
+          <div class="post-body">
+            <p th:text="${post.message != null ? post.message : post.experience}">Το μήνυμά σου</p>
+          </div>
+        </div>
+        <div class="post-footer">
+          <form th:action="@{/forum/like}" method="post">
+            <input type="hidden" name="postId" th:value="${post.id}" />
+            <button type="submit" class="like-button">Like</button>
+          </form>
+          <button type="button" class="reply-button"
+                  onclick="toggleReplyForm(5)">
+            Απάντηση
+          </button>
+          <span>Likes: <span th:text="${post.likeCount}">0</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar (όπως στο index) -->
+  <div id="mySidebar" class="sidebar">
+    <span class="closebtn" onclick="toggleSidebar()">&times;</span>
+    <div class="calendar-container">
+      <div class="calendar-title">March 2025</div>
+      <table class="calendar">
+        <thead>
+          <tr>
+            <th>M</th>
+            <th>T</th>
+            <th>W</th>
+            <th>T</th>
+            <th>F</th>
+            <th>S</th>
+            <th>S</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td>
+          </tr>
+          <tr>
+            <td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td>
+          </tr>
+          <tr>
+            <td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td>
+          </tr>
+          <tr>
+            <td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td>
+          </tr>
+          <tr>
+            <td>29</td><td>30</td><td>31</td><td></td><td></td><td></td><td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="sidebar-buttons" style="padding:20px; text-align:center;">
+      <button onclick="openProfileModal()" style="display:block; margin:10px auto; width:90%;">Το προφίλ μου</button>
+      <button onclick="redirectToDeclarations()" style="display:block; margin:10px auto; width:90%;">Οι δηλώσεις μου</button>
+      <button onclick="redirectToSettings()" style="display:block; margin:10px auto; width:90%;">Ρυθμίσεις</button>
+      <button onclick="signOut()" style="display:block; margin:10px auto; width:90%;">Sign out</button>
+    </div>
+  </div>
+
+  <!-- Footer (όπως στο index) -->
+  <footer>
+    <p>&copy; 2025 Οικονομικό Πανεπιστήμιο Αθηνών</p>
+  </footer>
+
+  <script>
+    // Ανάκτηση των τιμών CSRF
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
+
+    let universitiesByCountry = {};
+    let forumUniversitiesByCountry = {};
+    let currentDepartment = "";
+    let selectedUniversity = "";
+
+    async function fetchUniversities(department) {
+      try {
+        const url = '/api/universities?department=' + encodeURIComponent(department);
+        const response = await fetch(url);
+        universitiesByCountry = await response.json();
+        const countrySelect = document.getElementById("countrySelect");
+        if (countrySelect) {
+          countrySelect.innerHTML = '<option value="">-- Επιλέξτε χώρα --</option>';
+          Object.keys(universitiesByCountry).forEach(country => {
+            const option = document.createElement("option");
+            option.value = country;
+            option.textContent = country;
+            countrySelect.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error("Σφάλμα φόρτωσης δεδομένων:", error);
+      }
+    }
+
+    async function fetchForumUniversities(department) {
+      try {
+        const url = '/api/universities?department=' + encodeURIComponent(department);
+        const response = await fetch(url);
+        forumUniversitiesByCountry = await response.json();
+        const forumCountrySelect = document.getElementById("forumCountry");
+        if (forumCountrySelect) {
+          forumCountrySelect.innerHTML = '<option value="">-- Επιλέξτε Χώρα --</option>';
+          Object.keys(forumUniversitiesByCountry).forEach(country => {
+            const option = document.createElement("option");
+            option.value = country;
+            option.textContent = country;
+            forumCountrySelect.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error("Σφάλμα φόρτωσης δεδομένων για το forum:", error);
+      }
+    }
+
+    function populateForumUniversities(country) {
+      const forumUniversitySelect = document.getElementById("forumUniversity");
+      forumUniversitySelect.innerHTML = '<option value="">-- Επιλέξτε Πανεπιστήμιο --</option>';
+      if (forumUniversitiesByCountry[country]) {
+        forumUniversitiesByCountry[country].forEach(university => {
+          const option = document.createElement("option");
+          option.value = university;
+          option.textContent = university;
+          forumUniversitySelect.appendChild(option);
+        });
+      }
+    }
+
+    function showHome() {
+      window.location.href = "/";
+    }
+
+    async function showDepartment(name) {
+      currentDepartment = name;
+      window.location.href = "/departments?department=" + encodeURIComponent(name);
+    }
+
+    function showApplication() {
+      window.location.href = "/applications";
+    }
+
+    function redirectToDeclarations() {
+      window.location.href = "/declarations";
+    }
+    function redirectToSettings() {
+      window.location.href = "/settings";
+    }
+    function signOut() {
+      window.location.href = "/login";
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById("mySidebar");
+      if (sidebar.classList.contains("open")) {
+        sidebar.classList.remove("open");
+      } else {
+        sidebar.classList.add("open");
+      }
+    }
+
+    function openProfileModal() {
+      document.getElementById("profileModal").style.display = "block";
+      document.getElementById("profileModalOverlay").style.display = "block";
+    }
+    function closeProfileModal() {
+      document.getElementById("profileModal").style.display = "none";
+      document.getElementById("profileModalOverlay").style.display = "none";
+    }
+
+    function openCoursesPage() {
+      window.location.href = "/courses?university=" + encodeURIComponent(selectedUniversity);
+    }
+
+    async function loadHomeComments() {
+      try {
+        const response = await fetch('/api/forumPosts');
+        const posts = await response.json();
+        let html = '<table class="comment-table" id="homeCommentTable">';
+        html += '<thead><tr><th>Σχόλιο</th></tr></thead><tbody>';
+        if (posts.length === 0) {
+          html += '<tr><td>Δεν υπάρχουν σχόλια ακόμη.</td></tr>';
+        } else {
+          posts.forEach(post => {
+            html += `<tr><td><strong>${post.username}</strong> - ${new Date(post.timestamp).toLocaleString()}<br>${post.experience}</td></tr>`;
+          });
+        }
+        html += '</tbody></table>';
+        document.getElementById("studentComments").innerHTML = html;
+      } catch (error) {
+        console.error("Σφάλμα φόρτωσης σχολίων:", error);
+        document.getElementById("studentComments").innerHTML = '<p>Σφάλμα φόρτωσης σχολίων.</p>';
+      }
+    }
+
+    async function submitForumPost() {
+      // Αν χρησιμοποιείς τη φόρμα του Thymeleaf, αυτή η λειτουργία μπορεί να μην χρειάζεται εδώ.
+      // Εδώ μπορείς να προσθέσεις JavaScript για AJAX υποβολή, εάν επιθυμείς.
+    }
+
+    async function loadForumPosts() {
+      try {
+        const response = await fetch('/api/forumPosts');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const posts = await response.json();
+        let html = '';
+        if (posts.length === 0) {
+          html = '<p>Δεν υπάρχουν ερωτήσεις ακόμα.</p>';
+        } else {
+          posts.forEach(post => {
+            html += `
+            <div class="forum-post" id="post-${post.id}">
+              <div class="post-header">
+                <span class="post-user" th:text="${post.username}">${post.username}</span>
+                <span class="post-timestamp" th:text="${dates.format(post.timestamp, 'dd/MM/yyyy HH:mm')}">${new Date(post.timestamp).toLocaleString()}</span>
+              </div>
+              <div class="post-content">
+                ${ post.title ? `<div class="post-title"><h3 th:text="${post.title}">${post.title}</h3></div>` : "" }
+                <div class="post-body"><p th:text="${post.message != null ? post.message : post.experience}">${post.message || post.experience}</p></div>
+              </div>
+              <div class="post-footer">
+                <form th:action="@{/forum/like}" method="post">
+                  <input type="hidden" name="postId" th:value="${post.id}" />
+                  <button type="submit" class="like-button">Like</button>
+                </form>
+                <button type="button" class="reply-button" onclick="toggleReplyForm([[${post.id}]])">Απάντηση</button>
+                <span>Likes: <span th:text="${post.likeCount}">${post.likeCount}</span></span>
+              </div>
+            </div>`;
+          });
+        }
+        document.getElementById("forumContainer").innerHTML = html;
+      } catch (error) {
+        console.error("Σφάλμα φόρτωσης forum posts:", error);
+        document.getElementById("forumContainer").innerHTML = "<p>Σφάλμα φόρτωσης forum posts.</p>";
+      }
+    }
+
+    function toggleReplyForm(postId) {
+      const form = document.getElementById("reply-form-" + postId);
+      form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
+    }
+
+    async function submitForumReply(postId) {
+      const replyText = document.getElementById("reply-text-" + postId).value;
+      const formData = new FormData();
+      formData.append("postId", postId);
+      formData.append("reply", replyText);
+      formData.append("_csrf", csrfToken);
+      try {
+        const response = await fetch("/forum/reply/add", {
+          method: "POST",
+          body: formData
+        });
+        if (response.ok) {
+          alert("Η απάντησή σας καταχωρήθηκε επιτυχώς.");
+          loadForumPosts();
+        } else {
+          alert("Παρουσιάστηκε σφάλμα κατά την καταχώρηση της απάντησης.");
+        }
+      } catch (error) {
+        console.error("Σφάλμα κατά την υποβολή της απάντησης:", error);
+      }
+    }
+
+    // Οι λειτουργίες like/unlike θα βασίζονται στα υπάρχοντα endpoints.
+    // Εάν επιθυμείς δυναμική ενημέρωση μέσω JavaScript, θα πρέπει να υλοποιήσεις AJAX για τα like/unlike.
+  </script>
+</body>
+</html>
