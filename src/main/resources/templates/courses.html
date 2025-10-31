@@ -1,526 +1,1085 @@
 <!DOCTYPE html>
-<html lang="el"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="el" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Meta tags για CSRF (θα αντικατασταθούν από το Thymeleaf) -->
+  <!-- Meta tags για CSRF -->
   <meta name="_csrf" th:content="${_csrf.token}"/>
   <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
   <title>ΟΠΑ - ERASMUS | Μαθήματα</title>
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap" rel="stylesheet">
-  <!-- Εξωτερικό αρχείο CSS (styles.css πρέπει να βρίσκεται στο src/main/resources/static/css) -->
-  <link rel="stylesheet" th:href="@{/css/styles.css}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Επιπλέον styling για τον τίτλο */
-    .header-title {
-      font-size: 64px;
-      font-weight: bold;
-      color: #fff;
-      text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7);
-      animation: fadeInZoom 1.5s ease-out;
-      transition: transform 0.3s ease;
+    :root {
+      --primary: #00509e;
+      --primary-dark: #003366;
+      --primary-light: #0073e6;
+      --secondary: #ff6b6b;
+      --accent: #4ecdc4;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --gray: #6c757d;
+      --light-gray: #e9ecef;
+      --border-radius: 12px;
+      --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
     }
-    .header-title:hover {
-      transform: scale(1.05);
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    @keyframes fadeInZoom {
-      0% { opacity: 0; transform: scale(0.8); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    
-    /* ========== Βασικό Styling ========== */
+
     body {
       font-family: 'Poppins', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #ece9e6, #ffffff);
-      color: #333;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+      color: var(--dark);
+      line-height: 1.6;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
-      line-height: 1.6;
-      transition: background 0.5s ease;
     }
+
+    /* Header Styles */
     header {
-      background: linear-gradient(135deg, #003366, #00509e);
-      color: #fff;
-      padding: 25px 15px;
-      text-align: center;
-      font-size: 36px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      letter-spacing: 1px;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: white;
+      padding: 1.5rem 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       position: relative;
-    }
-    .auth-links {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 16px;
-    }
-    .auth-links a {
-      color: #fff;
-      text-decoration: none;
-      margin-right: 10px;
-    }
-    /* Εμφάνιση του username πάνω αριστερά */
-    .profile-info {
-      position: absolute;
-      top: 25px;
-      left: 25px;
-      font-size: 16px;
-    }
-    .profile-info a {
-      color: #fff;
-      text-decoration: none;
-    }
-    nav {
-      background-color: #00509e;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 12px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-    }
-    .nav-item {
-      color: #fff;
-      text-decoration: none;
-      padding: 12px 24px;
-      margin: 0 10px;
-      font-size: 18px;
-      border-radius: 30px;
-      transition: background-color 0.3s ease, transform 0.3s ease;
-    }
-    .nav-item:hover {
-      background-color: #0073e6;
-      transform: scale(1.05);
-    }
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: #fff;
-      min-width: 260px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-      z-index: 1;
-      left: 0;
-      top: 100%;
-      border-radius: 6px;
       overflow: hidden;
-      animation: fadeIn 0.3s ease;
     }
-    .dropdown-content a {
-      color: #003366;
-      padding: 14px 20px;
-      display: block;
-      text-decoration: none;
-      transition: background-color 0.3s ease;
-    }
-    .dropdown-content a:hover {
-      background-color: #eaf2ff;
-    }
-    .dropdown:hover .dropdown-content {
-      display: block;
-    }
-    .container {
-      width: 90%;
+
+    .header-container {
       max-width: 1200px;
-      margin: 40px auto;
-      padding: 40px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-      animation: fadeIn 0.5s ease;
-    }
-    /* Styling για τα μαθήματα (grid εξάμηνων) */
-    .university-name {
-      text-align: center;
-      font-size: 32px;
-      margin-bottom: 30px;
-      color: #003366;
-    }
-    .semesters {
+      margin: 0 auto;
+      padding: 0 2rem;
       display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
       justify-content: center;
+      font-weight: bold;
+      color: var(--primary);
+      font-size: 1.5rem;
     }
-    .semester {
-      width: 250px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+
+    .header-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #fff, #e6f7ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
-    .semester h3 {
-      text-align: center;
-      margin-bottom: 10px;
-      color: #00509e;
+
+    .auth-section {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
     }
-    .course-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
+
+    .auth-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 30px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
     }
-    .course-list li {
-      padding: 5px 0;
-      border-bottom: 1px solid #eee;
+
+    .auth-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
     }
-    .course-list li:last-child {
-      border-bottom: none;
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: white;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      transition: var(--transition);
     }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+
+    .user-profile:hover {
+      background: rgba(255, 255, 255, 0.1);
     }
-    /* Styling για τα modals */
-    #forumModalOverlay, #infoModalOverlay, #profileModalOverlay {
-      position: fixed;
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    /* Navigation Styles */
+    nav {
+      background: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      position: sticky;
       top: 0;
+      z-index: 100;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+    }
+
+    .nav-link {
+      padding: 1.2rem 1.5rem;
+      text-decoration: none;
+      color: var(--dark);
+      font-weight: 500;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .nav-link:hover {
+      color: var(--primary);
+    }
+
+    .nav-link.active {
+      color: var(--primary);
+    }
+
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
       left: 0;
       width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 999;
-      display: none;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px 3px 0 0;
     }
-    #forumModal, #infoModal, #profileModal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff;
-      padding: 30px;
+
+    .dropdown {
+      position: relative;
+    }
+
+    .dropdown-content {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      min-width: 250px;
+      box-shadow: var(--box-shadow);
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: var(--transition);
+      z-index: 10;
+    }
+
+    .dropdown:hover .dropdown-content {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .dropdown-item {
+      display: block;
+      padding: 1rem 1.5rem;
+      text-decoration: none;
+      color: var(--dark);
+      transition: var(--transition);
+      border-bottom: 1px solid var(--light-gray);
+    }
+
+    .dropdown-item:hover {
+      background: var(--light);
+      color: var(--primary);
+    }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Main Content Styles */
+    .main-container {
+      flex: 1;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+      width: 100%;
+    }
+
+    .content-card {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-size: 2rem;
+      color: var(--primary-dark);
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-bottom: 0.5rem;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .university-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 2rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      border-radius: var(--border-radius);
+    }
+
+    .university-name {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .university-location {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    /* Semesters Grid */
+    .semesters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .semester-card {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+      border-top: 4px solid var(--primary);
+    }
+
+    .semester-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .semester-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--light-gray);
+    }
+
+    .semester-title {
+      font-size: 1.5rem;
+      color: var(--primary-dark);
+      font-weight: 600;
+    }
+
+    .semester-badge {
+      background: var(--accent);
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .course-list {
+      list-style: none;
+    }
+
+    .course-item {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--light-gray);
+      transition: var(--transition);
+    }
+
+    .course-item:hover {
+      background: var(--light);
+      margin: 0 -1rem;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .course-item:last-child {
+      border-bottom: none;
+    }
+
+    .course-name {
+      font-weight: 500;
+      color: var(--dark);
+      margin-bottom: 0.3rem;
+    }
+
+    .course-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+
+    .course-ects {
+      background: var(--primary-light);
+      color: white;
+      padding: 0.2rem 0.6rem;
       border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      z-index: 1000;
-      display: none;
-      width: 90%;
-      max-width: 600px;
+      font-size: 0.8rem;
+      font-weight: 500;
     }
-    /* Sidebar όπως στο index (ακριβώς ίδιο) */
-    #mySidebar {
-      height: 100%;
-      width: 0;
+
+    /* Sidebar Styles */
+    .sidebar {
       position: fixed;
       top: 0;
+      right: -350px;
+      width: 350px;
+      height: 100%;
+      background: white;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      transition: var(--transition);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .sidebar.active {
       right: 0;
-      background-color: #f9f9f9;
-      box-shadow: -3px 0 10px rgba(0,0,0,0.2);
-      overflow-x: hidden;
-      transition: 0.3s;
-      padding-top: 60px;
-      z-index: 999;
     }
-    #mySidebar.open {
-      width: 320px;
+
+    .sidebar-header {
+      padding: 1.5rem;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .closebtn {
-      position: absolute;
-      top: 20px;
-      right: 25px;
-      font-size: 36px;
-      text-decoration: none;
-      color: #333;
-      cursor: pointer;
-    }
-    .openbtn {
-      position: fixed;
-      top: 355px;
-      right: 25px;
-      background: linear-gradient(135deg, #003366, #00509e);
-      color: #fff;
-      padding: 10px 16px;
-      font-size: 25px;
+
+    .sidebar-close {
+      background: none;
       border: none;
-      border-radius: 25px;
+      color: white;
+      font-size: 1.5rem;
       cursor: pointer;
-      z-index: 800;
     }
-    .openbtn:hover {
-      background-color: #0073e6;
+
+    .sidebar-content {
+      padding: 1.5rem;
     }
-    /* Στυλ για το ημερολόγιο στο Sidebar */
+
     .calendar-container {
-      text-align: center;
-      padding: 20px;
+      margin-bottom: 2rem;
     }
+
     .calendar-title {
-      font-size: 24px;
-      margin-bottom: 10px;
-      color: #003366;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--primary-dark);
+      text-align: center;
     }
-    table.calendar {
-      margin: 0 auto;
+
+    .calendar {
+      width: 100%;
       border-collapse: collapse;
-      width: 90%;
-      max-width: 250px;
     }
-    table.calendar th {
-      background-color: #0073e6;
-      color: #fff;
-      padding: 5px;
+
+    .calendar th {
+      background: var(--light);
+      padding: 0.5rem;
       text-align: center;
+      font-weight: 500;
     }
-    table.calendar td {
-      border: 1px solid #ddd;
+
+    .calendar td {
+      padding: 0.5rem;
       text-align: center;
-      padding: 8px;
+      border: 1px solid var(--light-gray);
       cursor: pointer;
     }
-    table.calendar td:hover {
-      background-color: #f0f0f0;
+
+    .calendar td:hover {
+      background: var(--light);
     }
-    /* Επιλογές στο Sidebar */
-    .sidebar-buttons {
-      padding: 20px;
-      text-align: center;
+
+    .sidebar-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
     }
-    .sidebar-buttons button {
-      display: block;
-      margin: 10px auto;
-      width: 90%;
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 25px;
-      background-color: #00509e;
-      color: #fff;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.3s ease;
+
+    .sidebar-action {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.8rem 1rem;
+      background: var(--light);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--dark);
+      transition: var(--transition);
     }
-    .sidebar-buttons button:hover {
-      background-color: #0073e6;
-      transform: scale(1.02);
+
+    .sidebar-action:hover {
+      background: var(--primary-light);
+      color: white;
     }
-    
+
+    /* Footer Styles */
     footer {
-      text-align: center;
-      padding: 20px 0;
-      background: #003366;
-      color: #fff;
+      background: var(--primary-dark);
+      color: white;
+      padding: 2rem 0;
       margin-top: auto;
-      font-size: 16px;
+    }
+
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .footer-text {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .header-container {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .nav-container {
+        flex-direction: column;
+        padding: 1rem;
+      }
+      
+      .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .semesters-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar {
+        width: 100%;
+        right: -100%;
+      }
+      
+      .university-name {
+        font-size: 2rem;
+      }
     }
   </style>
 </head>
-<body onload="showCourses()">
+<body>
+  <!-- Header -->
   <header>
-    <!-- Αν δεν είναι συνδεδεμένος ο χρήστης -->
-    <div class="auth-links" sec:authorize="!isAuthenticated()">
-      <a th:href="@{/login}">Log In</a>
-      <a th:href="@{/register}">Sign In</a>
+    <div class="header-container">
+      <div class="logo-container">
+        <div class="logo">EU</div>
+        <h1 class="header-title">Erasmus+</h1>
+      </div>
+      <div class="auth-section">
+        <!-- Αν δεν είναι συνδεδεμένος ο χρήστης -->
+        <div sec:authorize="!isAuthenticated()">
+          <button class="auth-btn" onclick="window.location.href='/login'">Log In</button>
+          <button class="auth-btn" onclick="window.location.href='/register'">Sign Up</button>
+        </div>
+        <!-- Εάν είναι συνδεδεμένος ο χρήστης -->
+        <div class="user-profile" sec:authorize="isAuthenticated()" onclick="openProfileModal()">
+          <div class="user-avatar">
+            <span sec:authentication="principal.username">Χ</span>
+          </div>
+          <span sec:authentication="principal.username">Χρήστης</span>
+        </div>
+      </div>
     </div>
-    <!-- Εάν ο χρήστης είναι συνδεδεμένος, εμφανίζεται το displayName (πάνω αριστερά) -->
-    <div class="profile-info" sec:authorize="isAuthenticated()">
-      <a th:href="@{/profile}" style="color: #fff; text-decoration: none;">
-        <span sec:authentication="principal.displayName">Χρήστης</span>
-      </a>
-    </div>
-    <h1 class="header-title">Eropa</h1>
-    <!-- Κουμπί toggle του Sidebar -->
-    <button class="openbtn" onclick="toggleSidebar()">☰</button>
   </header>
-  
-  <nav>
-    <a th:href="@{/}" class="nav-item" onclick="showHome()">ΑΡΧΙΚΗ</a>
-    <div class="dropdown">
-      <a href="#" class="nav-item">ΤΜΗΜΑΤΑ</a>
-      <div class="dropdown-content">
-        <a href="#" onclick="showDepartment('Οικονομικής Επιστήμης')">Οικονομικής Επιστήμης</a>
-        <a href="#" onclick="showDepartment('Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών')">Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών</a>
-        <a href="#" onclick="showDepartment('Διοικητικής Επιστήμης και Τεχνολογίας')">Διοικητικής Επιστήμης και Τεχνολογίας</a>
-        <a href="#" onclick="showDepartment('Οργάνωσης και Διοίκησης Επιχειρήσεων')">Οργάνωσης και Διοίκησης Επιχειρήσεων</a>
-        <a href="#" onclick="showDepartment('Μάρκετινγκ και Επικοινωνίας')">Μάρκετινγκ και Επικοινωνίας</a>
-        <a href="#" onclick="showDepartment('Στατιστικής')">Στατιστικής</a>
-        <a href="#" onclick="showDepartment('Πληροφορικής')">Πληροφορικής</a>
-      </div>
-    </div>
-    <a href="#" class="nav-item" onclick="showApplication()">ΑΙΤΗΣΕΙΣ</a>
-  </nav>
-  
-  <!-- Container για τα μαθήματα -->
-  <div class="container" id="content">
-    <!-- Εμφάνιση του ονόματος του Πανεπιστημίου -->
-    <div class="university-name" th:text="${university}">Όνομα Πανεπιστημίου</div>
-    <!-- Grid 8 εξάμηνων με τα μαθήματα -->
-    <div class="semesters">
-      <div class="semester">
-        <h3>Εξάμηνο 1</h3>
-        <ul class="course-list">
-          <li>Μάθημα 1</li>
-          <li>Μάθημα 2</li>
-          <li>Μάθημα 3</li>
-        </ul>
-      </div>
-      <div class="semester">
-        <h3>Εξάμηνο 2</h3>
-        <ul class="course-list">
-          <li>Μάθημα 1</li>
-          <li>Μάθημα 2</li>
-          <li>Μάθημα 3</li>
-        </ul>
-      </div>
-      <div class="semester">
-        <h3>Εξάμηνο 3</h3>
-        <ul class="course-list">
-          <li>Μάθημα 1</li>
-          <li>Μάθημα 2</li>
-          <li>Μάθημα 3</li>
-        </ul>
-      </div>
-      <div class="semester">
-        <h3>Εξάμηνο 4</h3>
-        <ul class="course-list">
-          <li>Μάθημα 1</li>
-          <li>Μάθημα 2</li>
-          <li>Μάθημα 3</li>
-        </ul>
-      </div>
-      <div class="semester">
-        <h3>Εξάμηνο 5</h3>
-        <ul class="course-list">
-          <li>Μάθημα 1</li>
-          <li>Μάθημα 2</li>
-          <li>Μάθημα 3</li>
-        </ul>
-      </div>
-      <div class="semester">
-        <h3>Εξάμηνο 6</h3>
-        <ul class="course-list">
-          <li>Μάθημα 1</li>
-          <li>Μάθημα 2</li>
-          <li>Μάθημα 3</li>
-        </ul>
-      </div>
-      <div class="semester">
-        <h3>Εξάμηνο 7</h3>
-        <ul class="course-list">
-          <li>Μάθημα 1</li>
-          <li>Μάθημα 2</li>
-          <li>Μάθημα 3</li>
-        </ul>
-      </div>
-      <div class="semester">
-        <h3>Εξάμηνο 8</h3>
-        <ul class="course-list">
-          <li>Μάθημα 1</li>
-          <li>Μάθημα 2</li>
-          <li>Μάθημα 3</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Sidebar όπως στο αρχικό index -->
-  <div id="mySidebar" class="sidebar">
-    <span class="closebtn" onclick="toggleSidebar()">&times;</span>
-    <div class="calendar-container">
-      <div class="calendar-title">March 2025</div>
-      <table class="calendar">
-        <thead>
-          <tr>
-            <th>M</th>
-            <th>T</th>
-            <th>W</th>
-            <th>T</th>
-            <th>F</th>
-            <th>S</th>
-            <th>S</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td>
-          </tr>
-          <tr>
-            <td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td>
-          </tr>
-          <tr>
-            <td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td>
-          </tr>
-          <tr>
-            <td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td>
-          </tr>
-          <tr>
-            <td>29</td><td>30</td><td>31</td><td></td><td></td><td></td><td></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <!-- ΝΕΕΣ Επιλογές στο Sidebar -->
-    <div class="sidebar-buttons" style="padding: 20px; text-align: center;">
-      <button onclick="openProfileModal()" style="display: block; margin: 10px auto; width: 90%;">Το προφίλ μου</button>
-      <button onclick="redirectToDeclarations()" style="display: block; margin: 10px auto; width: 90%;">Οι δηλώσεις μου</button>
-      <button onclick="redirectToSettings()" style="display: block; margin: 10px auto; width: 90%;">Ρυθμίσεις</button>
-      <button onclick="signOut()" style="display: block; margin: 10px auto; width: 90%;">Sign out</button>
-    </div>
-  </div>
-  
-  <footer>
-    <p>&copy; 2025 Οικονομικό Πανεπιστήμιο Αθηνών</p>
-  </footer>
-  
-  <script>
-    // Ανάκτηση CSRF τιμών
-    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
 
-    // Dummy συνάρτηση φόρτωσης της σελίδας μαθημάτων
-    function showCourses() {
-      console.log("Σελίδα μαθημάτων φορτώθηκε");
-    }
-    
-    // Συνάρτηση για toggle του Sidebar (όπως στο index)
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container">
+      <ul class="nav-links">
+        <li><a th:href="@{/}" class="nav-link">ΑΡΧΙΚΗ</a></li>
+        <li class="dropdown">
+          <a href="#" class="nav-link">ΤΜΗΜΑΤΑ</a>
+          <div class="dropdown-content">
+            <a th:href="@{/departments?department=Οικονομικής Επιστήμης}" class="dropdown-item">Οικονομικής Επιστήμης</a>
+            <a th:href="@{/departments?department=Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών}" class="dropdown-item">Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών</a>
+            <a th:href="@{/departments?department=Διοικητικής Επιστήμης και Τεχνολογίας}" class="dropdown-item">Διοικητικής Επιστήμης και Τεχνολογίας</a>
+            <a th:href="@{/departments?department=Οργάνωσης και Διοίκησης Επιχειρήσεων}" class="dropdown-item">Οργάνωσης και Διοίκησης Επιχειρήσεων</a>
+            <a th:href="@{/departments?department=Μάρκετινγκ και Επικοινωνίας}" class="dropdown-item">Μάρκετινγκ και Επικοινωνίας</a>
+            <a th:href="@{/departments?department=Στατιστικής}" class="dropdown-item">Στατιστικής</a>
+            <a th:href="@{/departments?department=Πληροφορικής}" class="dropdown-item">Πληροφορικής</a>
+          </div>
+        </li>
+        <li><a th:href="@{/forum}" class="nav-link">ERASMUS FORUM</a></li>
+        <li><a th:href="@{/applications}" class="nav-link">ΑΙΤΗΣΕΙΣ</a></li>
+      </ul>
+      <button class="btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i> Μενού</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-container">
+    <div class="content-card">
+      <!-- Header με πληροφορίες πανεπιστημίου -->
+      <div class="university-header">
+        <h1 class="university-name" th:text="${university}">Όνομα Πανεπιστημίου</h1>
+        <div class="university-location">
+          <i class="fas fa-map-marker-alt"></i>
+          <span th:text="${universityLocation != null ? universityLocation : 'Ευρώπη'}">Τοποθεσία</span>
+        </div>
+      </div>
+
+      <h2 class="section-title">Πρόγραμμα Μαθημάτων</h2>
+      <p>Δείτε τα διαθέσιμα μαθήματα για κάθε εξάμηνο στο πανεπιστήμιο <strong th:text="${university}">Πανεπιστήμιο</strong>.</p>
+
+      <!-- Grid με τα 8 εξάμηνα -->
+      <div class="semesters-grid">
+        <!-- Εξάμηνο 1 -->
+        <div class="semester-card">
+          <div class="semester-header">
+            <h3 class="semester-title">Εξάμηνο 1</h3>
+            <span class="semester-badge">30 ECTS</span>
+          </div>
+          <ul class="course-list">
+            <li class="course-item">
+              <div class="course-name">Εισαγωγή στην Πληροφορική</div>
+              <div class="course-info">
+                <span>Καθηγητής: Ν. Παπαδόπουλος</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Μαθηματικά Ι</div>
+              <div class="course-info">
+                <span>Καθηγητής: Α. Αντωνίου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Προγραμματισμός</div>
+              <div class="course-info">
+                <span>Καθηγητής: Μ. Κωνσταντίνου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Ψηφιακά Κυκλώματα</div>
+              <div class="course-info">
+                <span>Καθηγητής: Ε. Γεωργίου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Αγγλικά Τεχνικής</div>
+              <div class="course-info">
+                <span>Καθηγητής: Σ. Δημητρίου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Εξάμηνο 2 -->
+        <div class="semester-card">
+          <div class="semester-header">
+            <h3 class="semester-title">Εξάμηνο 2</h3>
+            <span class="semester-badge">30 ECTS</span>
+          </div>
+          <ul class="course-list">
+            <li class="course-item">
+              <div class="course-name">Δομές Δεδομένων</div>
+              <div class="course-info">
+                <span>Καθηγητής: Κ. Αλεξίου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Μαθηματικά ΙΙ</div>
+              <div class="course-info">
+                <span>Καθηγητής: Π. Παπαγεωργίου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Αντικειμενοστρεφής Προγραμματισμός</div>
+              <div class="course-info">
+                <span>Καθηγητής: Ν. Νικολάου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Βάσεις Δεδομένων</div>
+              <div class="course-info">
+                <span>Καθηγητής: Α. Βασιλείου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Πιθανότητες & Στατιστική</div>
+              <div class="course-info">
+                <span>Καθηγητής: Μ. Παυλίδης</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Εξάμηνο 3 -->
+        <div class="semester-card">
+          <div class="semester-header">
+            <h3 class="semester-title">Εξάμηνο 3</h3>
+            <span class="semester-badge">30 ECTS</span>
+          </div>
+          <ul class="course-list">
+            <li class="course-item">
+              <div class="course-name">Λειτουργικά Συστήματα</div>
+              <div class="course-info">
+                <span>Καθηγητής: Γ. Παπαδάκης</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Δίκτυα Υπολογιστών</div>
+              <div class="course-info">
+                <span>Καθηγητής: Δ. Κωνσταντίνου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Αλγόριθμοι</div>
+              <div class="course-info">
+                <span>Καθηγητής: Ε. Αναστασίου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Τεχνητή Νοημοσύνη</div>
+              <div class="course-info">
+                <span>Καθηγητής: Σ. Θεοδωρίδης</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Ανάπτυξη Λογισμικού</div>
+              <div class="course-info">
+                <span>Καθηγητής: Κ. Μιχαηλίδης</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Εξάμηνο 4 -->
+        <div class="semester-card">
+          <div class="semester-header">
+            <h3 class="semester-title">Εξάμηνο 4</h3>
+            <span class="semester-badge">30 ECTS</span>
+          </div>
+          <ul class="course-list">
+            <li class="course-item">
+              <div class="course-name">Ασφάλεια Πληροφοριακών Συστημάτων</div>
+              <div class="course-info">
+                <span>Καθηγητής: Π. Κυριακού</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Βιομηχανική Εμπειρία</div>
+              <div class="course-info">
+                <span>Καθηγητής: Μ. Σταυρίδης</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Μηχανική Μάθηση</div>
+              <div class="course-info">
+                <span>Καθηγητής: Α. Παπαδόπουλος</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Προηγμένα Θέματα Βάσεων Δεδομένων</div>
+              <div class="course-info">
+                <span>Καθηγητής: Ν. Αντωνίου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Επιχειρησιακή Έρευνα</div>
+              <div class="course-info">
+                <span>Καθηγητής: Ε. Γεωργιάδης</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Εξάμηνο 5 -->
+        <div class="semester-card">
+          <div class="semester-header">
+            <h3 class="semester-title">Εξάμηνο 5</h3>
+            <span class="semester-badge">30 ECTS</span>
+          </div>
+          <ul class="course-list">
+            <li class="course-item">
+              <div class="course-name">Κινητές Εφαρμογές</div>
+              <div class="course-info">
+                <span>Καθηγητής: Σ. Δημητρίου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Νέφος Υπολογιστών</div>
+              <div class="course-info">
+                <span>Καθηγητής: Κ. Αλεξίου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Διαδικτυακά Κοινωνικά Δίκτυα</div>
+              <div class="course-info">
+                <span>Καθηγητής: Μ. Παπαδάκης</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Προηγμένα Συστήματα Λογισμικού</div>
+              <div class="course-info">
+                <span>Καθηγητής: Α. Νικολάου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Επιχειρησιακή Νοημοσύνη</div>
+              <div class="course-info">
+                <span>Καθηγητής: Π. Θεοδωρίδης</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Εξάμηνο 6 -->
+        <div class="semester-card">
+          <div class="semester-header">
+            <h3 class="semester-title">Εξάμηνο 6</h3>
+            <span class="semester-badge">30 ECTS</span>
+          </div>
+          <ul class="course-list">
+            <li class="course-item">
+              <div class="course-name">Μεγάλα Δεδομένα</div>
+              <div class="course-info">
+                <span>Καθηγητής: Ε. Αναστασίου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Ασφάλεια Δικτύων</div>
+              <div class="course-info">
+                <span>Καθηγητής: Γ. Παπαγεωργίου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Προηγμένα Θέματα Τεχνητής Νοημοσύνης</div>
+              <div class="course-info">
+                <span>Καθηγητής: Ν. Κυριακού</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Διαχείριση Έργων Πληροφορικής</div>
+              <div class="course-info">
+                <span>Καθηγητής: Μ. Σταυρίδης</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Ηθική στην Πληροφορική</div>
+              <div class="course-info">
+                <span>Καθηγητής: Α. Βασιλείου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Εξάμηνο 7 -->
+        <div class="semester-card">
+          <div class="semester-header">
+            <h3 class="semester-title">Εξάμηνο 7</h3>
+            <span class="semester-badge">30 ECTS</span>
+          </div>
+          <ul class="course-list">
+            <li class="course-item">
+              <div class="course-name">Ειδικά Θέματα Πληροφορικής</div>
+              <div class="course-info">
+                <span>Καθηγητής: Π. Παπαδόπουλος</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Συστήματα Υποστήριξης Αποφάσεων</div>
+              <div class="course-info">
+                <span>Καθηγητής: Κ. Μιχαηλίδης</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Προηγμένα Θέματα Δικτύων</div>
+              <div class="course-info">
+                <span>Καθηγητής: Σ. Γεωργίου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Επιχειρησιακά Συστήματα</div>
+              <div class="course-info">
+                <span>Καθηγητής: Α. Δημητρίου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Σχεδίαση και Ανάπτυξη Συστημάτων</div>
+              <div class="course-info">
+                <span>Καθηγητής: Ε. Κωνσταντίνου</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Εξάμηνο 8 -->
+        <div class="semester-card">
+          <div class="semester-header">
+            <h3 class="semester-title">Εξάμηνο 8</h3>
+            <span class="semester-badge">30 ECTS</span>
+          </div>
+          <ul class="course-list">
+            <li class="course-item">
+              <div class="course-name">Πτυχιακή Εργασία</div>
+              <div class="course-info">
+                <span>Καθηγητής: Δ. Αντωνίου</span>
+                <span class="course-ects">12 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Πρακτική Άσκηση</div>
+              <div class="course-info">
+                <span>Καθηγητής: Μ. Παυλίδης</span>
+                <span class="course-ects">12 ECTS</span>
+              </div>
+            </li>
+            <li class="course-item">
+              <div class="course-name">Επιλογής 1</div>
+              <div class="course-info">
+                <span>Ελεύθερη επιλογή</span>
+                <span class="course-ects">6 ECTS</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h3>Μενού Χρήστη</h3>
+      <button class="sidebar-close" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <div class="sidebar-content">
+      <div class="calendar-container">
+        <h4 class="calendar-title">Μάρτιος 2025</h4>
+        <table class="calendar">
+          <thead>
+            <tr>
+              <th>Δ</th>
+              <th>T</th>
+              <th>T</th>
+              <th>Π</th>
+              <th>Π</th>
+              <th>Σ</th>
+              <th>Κ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>2</td>
+              <td>3</td>
+              <td>4</td>
+              <td>5</td>
+              <td>6</td>
+              <td>7</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>9</td>
+              <td>10</td>
+              <td>11</td>
+              <td>12</td>
+              <td>13</td>
+              <td>14</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td>16</td>
+              <td>17</td>
+              <td>18</td>
+              <td>19</td>
+              <td>20</td>
+              <td>21</td>
+            </tr>
+            <tr>
+              <td>22</td>
+              <td>23</td>
+              <td>24</td>
+              <td>25</td>
+              <td>26</td>
+              <td>27</td>
+              <td>28</td>
+            </tr>
+            <tr>
+              <td>29</td>
+              <td>30</td>
+              <td>31</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sidebar-actions">
+        <a th:href="@{/profile}" class="sidebar-action">
+          <i class="fas fa-user"></i> Το προφίλ μου
+        </a>
+        <a th:href="@{/declarations}" class="sidebar-action">
+          <i class="fas fa-file-alt"></i> Οι δηλώσεις μου
+        </a>
+        <a th:href="@{/settings}" class="sidebar-action">
+          <i class="fas fa-cog"></i> Ρυθμίσεις
+        </a>
+        <a th:href="@{/logout}" class="sidebar-action">
+          <i class="fas fa-sign-out-alt"></i> Αποσύνδεση
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-logo">Erasmus+</div>
+      <div class="footer-text">&copy; 2025 Οικονομικό Πανεπιστήμιο Αθηνών</div>
+    </div>
+  </footer>
+
+  <script>
+    // Συνάρτηση για το sidebar
     function toggleSidebar() {
-      const sidebar = document.getElementById("mySidebar");
-      if (sidebar.classList.contains("open")) {
-        sidebar.classList.remove("open");
-      } else {
-        sidebar.classList.add("open");
-      }
+      document.getElementById('sidebar').classList.toggle('active');
     }
-    
-    // Διορθωμένες συναρτήσεις για το menu:
-    function showDepartment(dept) {
-      // Ανακατεύθυνση στη σελίδα των τμημάτων με το επιλεγμένο τμήμα ως παράμετρο
-      window.location.href = "/departments?department=" + encodeURIComponent(dept);
+
+    // Συνάρτηση για το φιλτράρισμα μαθημάτων (προαιρετικό)
+    function filterCourses(semester) {
+      const cards = document.querySelectorAll('.semester-card');
+      cards.forEach(card => {
+        if (semester === 'all' || card.querySelector('.semester-title').textContent.includes(semester)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
     }
-    function showApplication() {
-      // Ανακατεύθυνση στη σελίδα αιτήσεων
-      window.location.href = "/applications";
-    }
-    
-    // Dummy συναρτήσεις για τις μεταβάσεις και τα modals
-    function showHome() { window.location.href = "/"; }
-    function closeForumModal() {
-      document.getElementById("forumModal").style.display = "none";
-      document.getElementById("forumModalOverlay").style.display = "none";
-    }
-    function closeUniversityInfoModal() {
-      document.getElementById("infoModal").style.display = "none";
-      document.getElementById("infoModalOverlay").style.display = "none";
-    }
-    function showCommentsInInfoModal() { /* ... */ }
-    function submitForumPost() { /* ... */ }
-    function openCoursesPage() { window.location.href = "/courses"; }
-    function openProfileModal() {
-      document.getElementById("profileModal").style.display = "block";
-      document.getElementById("profileModalOverlay").style.display = "block";
-    }
-    function closeProfileModal() {
-      document.getElementById("profileModal").style.display = "none";
-      document.getElementById("profileModalOverlay").style.display = "none";
-    }
-    function saveProfile() { /* ... */ }
-    function redirectToDeclarations() { window.location.href = "/declarations"; }
-    function redirectToSettings() { window.location.href = "/settings"; }
-    function signOut() { window.location.href = "/login"; }
+
+    // Προσθήκη hover effects στα μαθήματα
+    document.addEventListener('DOMContentLoaded', function() {
+      const courseItems = document.querySelectorAll('.course-item');
+      courseItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateX(5px)';
+        });
+        item.addEventListener('mouseleave', function() {
+          this.style.transform = 'translateX(0)';
+        });
+      });
+    });
   </script>
 </body>
 </html>

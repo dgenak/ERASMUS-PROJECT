@@ -1,669 +1,1135 @@
 <!DOCTYPE html>
-<html lang="el"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="el" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Meta tags για CSRF (θα αντικατασταθούν από το Thymeleaf) -->
   <meta name="_csrf" th:content="${_csrf.token}"/>
   <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
   <title>ΟΠΑ - ERASMUS</title>
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap" rel="stylesheet">
-  <!-- Εξωτερικό αρχείο CSS (styles.css πρέπει να βρίσκεται στο src/main/resources/static/css) -->
-  <link rel="stylesheet" th:href="@{/css/styles.css}">
-
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Εξτρά Στυλ για τον τίτλο ώστε να είναι πιο εμφανίσιμος */
-    .header-title {
-      font-size: 64px;                
-      font-weight: bold;
-      color: #fff;
-      text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7);
-      animation: fadeInZoom 1.5s ease-out;
-      transition: transform 0.3s ease;
+    :root {
+      --primary: #00509e;
+      --primary-dark: #003366;
+      --primary-light: #0073e6;
+      --secondary: #ff6b6b;
+      --accent: #4ecdc4;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --gray: #6c757d;
+      --light-gray: #e9ecef;
+      --border-radius: 12px;
+      --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
     }
-    .header-title:hover {
-      transform: scale(1.05);
-    }
-    @keyframes fadeInZoom {
-      0% { opacity: 0; transform: scale(0.8); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    
-    /* ========== Βασικό Styling ========== */
-    body {
-      font-family: 'Poppins', sans-serif;
+
+    * {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #ece9e6, #ffffff);
-      color: #333;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+      color: var(--dark);
+      line-height: 1.6;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
-      line-height: 1.6;
-      transition: background 0.5s ease;
     }
+
+    /* Header Styles */
     header {
-      background: linear-gradient(135deg, #003366, #00509e);
-      color: #fff;
-      padding: 25px 15px;
-      text-align: center;
-      font-size: 36px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      letter-spacing: 1px;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: white;
+      padding: 1.5rem 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       position: relative;
-    }
-    .auth-links {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 16px;
-    }
-    .auth-links a {
-      color: #fff;
-      text-decoration: none;
-      margin-right: 10px;
-    }
-    .profile-info {
-      position: absolute;
-      top: 25px;
-      left: 25px;
-      font-size: 16px;
-    }
-    .profile-info a {
-      color: #fff;
-      text-decoration: none;
-    }
-    nav {
-      background-color: #00509e;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 12px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-    }
-    .nav-item {
-      color: #fff;
-      text-decoration: none;
-      padding: 12px 24px;
-      margin: 0 10px;
-      font-size: 18px;
-      border-radius: 30px;
-      transition: background-color 0.3s ease, transform 0.3s ease;
-    }
-    .nav-item:hover {
-      background-color: #0073e6;
-      transform: scale(1.05);
-    }
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: #fff;
-      min-width: 260px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-      z-index: 1;
-      left: 0;
-      top: 100%;
-      border-radius: 6px;
       overflow: hidden;
-      animation: fadeIn 0.3s ease;
     }
-    .dropdown-content a {
-      color: #003366;
-      padding: 14px 20px;
-      display: block;
-      text-decoration: none;
-      transition: background-color 0.3s ease;
-    }
-    .dropdown-content a:hover {
-      background-color: #eaf2ff;
-    }
-    .dropdown:hover .dropdown-content {
-      display: block;
-    }
-    .container {
-      width: 90%;
+
+    .header-container {
       max-width: 1200px;
-      margin: 40px auto;
-      padding: 40px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-      animation: fadeIn 0.5s ease;
-    }
-    .select-container {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-    select, textarea, button {
-      font-family: inherit;
-    }
-    select {
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      outline: none;
-      transition: border-color 0.3s ease;
-      max-width: 100%;
-    }
-    select:focus { border-color: #00509e; }
-    textarea {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.3s ease;
-    }
-    textarea:focus { border-color: #00509e; }
-    button {
-      padding: 12px 24px;
-      font-size: 16px;
-      border: none;
-      border-radius: 25px;
-      background-color: #00509e;
-      color: #fff;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.3s ease;
-      margin: 10px 5px;
-    }
-    button:hover { background-color: #0073e6; transform: scale(1.02); }
-    .button-container {
-      display: flex;       /* Flex layout για οριζόντια στοίχιση */
-      flex-direction: row; /* Από προεπιλογή είναι row, αλλά το γράφουμε για σαφήνεια */
-      gap: 20px;           /* Απόσταση (κενό) ανάμεσα στα κουμπιά */
-    }
-
-    /* Κουμπιά με ίδιες διαστάσεις και στοίχιση του κειμένου αριστερά */
-    .custom-button {
-      display: flex;
-      justify-content: flex-start; /* Στοίχιση προς τα αριστερά */
-      align-items: center;
-      width: 350px;    /* Σταθερό πλάτος */
-      height: 250px;   /* Σταθερό ύψος */
-      padding-left: 20px; /* Λίγο κενό αριστερά */
-      background: linear-gradient(135deg, #d2d2d3, #f5f3f348);
-      border: 1px solid #fcfcfcaf;
-      border-radius: 40px;
-      color: #1747ca;
-      font-weight: bold;
-      font-size: 30px;
-      cursor: pointer;
-      text-decoration: none;
-      margin-top: 20px;
-      transition: box-shadow 0.2s ease, transform 0.2s ease;
-      white-space: normal;
-      word-wrap: break-word;
-    }
-
-    .custom-button:hover {
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      transform: translateY(-2px);
-    }
-
-
-    .custom-button:hover {
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      transform: translateY(-2px);
-    }
-    .table-container {
-      margin-top: 25px;
-      animation: fadeIn 0.5s ease;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 14px;
-      text-align: left;
-    }
-    th { background-color: #00509e; color: #fff; }
-    .comment-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        margin-top: 20px;
-        font-family: 'Poppins', sans-serif;
-        border-radius: 15px;
-        overflow: hidden;
-    }
-    .comment-table th {
-        background-color: #00509e;
-        color: #fff;
-        padding: 14px;
-        text-align: left;
-        font-size: 18px;
-    }
-    .comment-table td {
-        border: 1px solid #ddd;
-        padding: 14px;
-        font-size: 16px;
-    }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    /* Modal Styling */
-    #forumModal, #forumModalOverlay, #experienceModal, #experienceModalOverlay,
-    #infoModal, #infoModalOverlay, #profileModal, #profileModalOverlay {
-      transition: opacity 0.3s ease;
-    }
-
-    /* ================== MODALS ================== */
-    #forumModal, #experienceModal, #infoModal, #profileModal, #uploadPhotoModal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      /* Αρχικά μικρότερη κλίμακα και αόρατο */
-      transform: translate(-50%, -50%) scale(0.9);
-      opacity: 0;
-
-      /* Βασικά χαρακτηριστικά εμφάνισης */
-      background: #fff;
-      padding: 30px;
-      border-radius: 16px; /* Πιο έντονο «στρογγύλεμα» */
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      z-index: 1000;
-      width: 90%;
-      max-width: 500px;
-      display: none; /* Εξαρχής κρυμμένο */
-
-      /* Για να δώσουμε ένα ομαλό fade+scale */
-      transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-    }
-
-    /* ================== OVERLAYS ================== */
-    #forumModalOverlay, #experienceModalOverlay, #infoModalOverlay, 
-    #profileModalOverlay, #uploadPhotoModalOverlay {
-      position: fixed;
-      top: 0; 
-      left: 0;
-      width: 100%; 
-      height: 100%;
-      /* Ελαφρύ σκούρο φόντο + blur */
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(4px);
-      z-index: 999;
-      display: none; /* Εξαρχής κρυμμένο */
-      opacity: 0;
-      transition: opacity 0.3s ease-out;
-    }
-
-    /* ================== CLASS ΓΙΑ ΝΑ ΕΜΦΑΝΙΣΤΟΥΝ ================== */
-    /* Μπορείς να προσθέτεις μια κλάση π.χ. .show για να εμφανίζονται με animation */
-    .show-modal {
-      display: block;
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
-    }
-    .show-overlay {
-      display: block;
-      opacity: 1;
-    }
-
-
-    #forumModalOverlay, #experienceModalOverlay, #infoModalOverlay, #profileModalOverlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 999;
-      display: none;
-    }
-    #forumModal, #experienceModal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      z-index: 1000;
-      width: 90%;
-      max-width: 500px;
-      display: none;
-    }
-    #infoModal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      z-index: 1100;
-      width: 90%;
-      max-width: 600px;
-      display: none;
-    }
-    #profileModal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      z-index: 1150;
-      width: 90%;
-      max-width: 500px;
-      display: none;
-    }
-    /* Sidebar Styling */
-    .sidebar {
-      height: 100%;
-      width: 0;
-      position: fixed;
-      top: 0;
-      right: 0;
-      background-color: #f9f9f9;
-      box-shadow: -3px 0 10px rgba(0,0,0,0.2);
-      overflow-x: hidden;
-      transition: 0.3s;
-      padding-top: 60px;
-      z-index: 999;
-    }
-    .sidebar.open { width: 320px; }
-    .closebtn {
-      position: absolute;
-      top: 20px;
-      right: 25px;
-      font-size: 36px;
-      text-decoration: none;
-      color: #333;
-      cursor: pointer;
-    }
-    .openbtn {
-      position: fixed;
-      top: 355px;
-      right: 25px;
-      background: linear-gradient(135deg, #003366, #00509e);
-      color: #fff;
-      padding: 10px 16px;
-      font-size: 25px;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      z-index: 800;
-    }
-    .openbtn:hover { background-color: #0073e6; }
-    .calendar-container { text-align: center; padding: 20px; }
-    .calendar-title { font-size: 24px; margin-bottom: 10px; color: #003366; }
-    table.calendar {
       margin: 0 auto;
-      border-collapse: collapse;
-      width: 90%;
-      max-width: 250px;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
     }
-    table.calendar th {
-      background-color: #0073e6;
-      color: #fff;
-      padding: 5px;
-      text-align: center;
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
-    table.calendar td {
-      border: 1px solid #ddd;
-      text-align: center;
-      padding: 8px;
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: var(--primary);
+      font-size: 1.5rem;
+    }
+
+    .header-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #fff, #e6f7ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .auth-section {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .auth-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 30px;
+      font-weight: 500;
       cursor: pointer;
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
     }
-    table.calendar td:hover { background-color: #f0f0f0; }
-    footer {
-      text-align: center;
-      padding: 20px 0;
-      background: #003366;
-      color: #fff;
-      margin-top: auto;
-      font-size: 16px;
+
+    .auth-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
     }
-    /* Like Button Styling */
-    .like-button {
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: white;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      transition: var(--transition);
+    }
+
+    .user-profile:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .user-avatar {
       width: 40px;
       height: 40px;
-      border: none;
-      cursor: pointer;
-      outline: none;
-      background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIj48cGF0aCBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIGQ9Ik0xMi43NiAzLjM2Yy0xLjYxLTEuMzItNC4xLTEuMi01LjY0LjI3LTEuNjUgMS41Ny0xLjggNC4xLS4zIDUuODhsNS4xOCA1LjY3IDUuMTgtNS42N2MxLjUtMS43OCAxLjM1LTQuMzEtLjMtNS44OC0xLjU0LTEuNDctNC4wMy0xLjU5LTUuNjQuMjd6Ii8+PC9zdmc+") center center / contain no-repeat;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
     }
-    .like-button.liked {
-      background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIj48cGF0aCBmaWxsPSJyZWQiIHN0cm9rZT0icmVkIiBzdHJva2Utd2lkdGg9IjIiIGQ9Ik0xMi43NiAzLjM2Yy0xLjYxLTEuMzItNC4xLTEuMi01LjY0LjI3LTEuNjUgMS41Ny0xLjggNC4xLS4zIDUuODhsNS4xOCA1LjY3IDUuMTgtNS42N2MxLjUtMS43OCAxLjM1LTQuMzEtLjMtNS44OC0xLjU0LTEuNDctNC4wMy0xLjU5LTUuNjQuMjd6Ii8+PC9zdmc+") center center / contain no-repeat;
+
+    /* Navigation Styles */
+    nav {
+      background: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+    }
+
+    .nav-link {
+      padding: 1.2rem 1.5rem;
+      text-decoration: none;
+      color: var(--dark);
+      font-weight: 500;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .nav-link:hover {
+      color: var(--primary);
+    }
+
+    .nav-link.active {
+      color: var(--primary);
+    }
+
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px 3px 0 0;
+    }
+
+    .dropdown {
+      position: relative;
+    }
+
+    .dropdown-content {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      min-width: 250px;
+      box-shadow: var(--box-shadow);
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: var(--transition);
+      z-index: 10;
+    }
+
+    .dropdown:hover .dropdown-content {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .dropdown-item {
+      display: block;
+      padding: 1rem 1.5rem;
+      text-decoration: none;
+      color: var(--dark);
+      transition: var(--transition);
+      border-bottom: 1px solid var(--light-gray);
+    }
+
+    .dropdown-item:hover {
+      background: var(--light);
+      color: var(--primary);
+    }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Main Content Styles */
+    .main-container {
+      flex: 1;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+      width: 100%;
+    }
+
+    .content-card {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-size: 2rem;
+      color: var(--primary-dark);
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-bottom: 0.5rem;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .hero-section {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      border-radius: var(--border-radius);
+      margin-bottom: 2rem;
+    }
+
+    .hero-title {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    .hero-subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .cta-button {
+      background: white;
+      color: var(--primary);
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .cta-button:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .cta-button.secondary {
+      background: transparent;
+      color: white;
+      border: 2px solid white;
+    }
+
+    .cta-button.secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Feature Cards */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .feature-card {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+      text-align: center;
+      border-top: 4px solid var(--primary);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .feature-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--primary-dark);
+    }
+
+    .feature-description {
+      color: var(--gray);
+    }
+
+    /* Department Section */
+    .department-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .department-btn {
+      background: var(--light);
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 30px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .department-btn:hover {
+      background: var(--primary-light);
+      color: white;
+    }
+
+    .department-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .university-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+    }
+
+    .university-table th {
+      background: var(--primary);
+      color: white;
+      padding: 1rem;
+      text-align: left;
+    }
+
+    .university-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--light-gray);
+      cursor: pointer;
+    }
+
+    .university-table tr:hover {
+      background: var(--light);
+    }
+
+    /* Forum Styles */
+    .forum-posts {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .forum-post {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+    }
+
+    .forum-post:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .post-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .post-author {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .post-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    .post-title {
+      font-size: 1.3rem;
+      color: var(--primary-dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--gray);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .action-btn:hover {
+      color: var(--primary);
+    }
+
+    .reply-form {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--light);
+      border-radius: var(--border-radius);
+    }
+
+    .reply-item {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--light);
+      border-radius: var(--border-radius);
+      border-left: 3px solid var(--primary);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: white;
+      border-radius: var(--border-radius);
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: scale(0.9);
+      opacity: 0;
+      transition: var(--transition);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-overlay.active .modal {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .modal-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--light-gray);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      color: var(--primary-dark);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--gray);
+    }
+
+    .modal-body {
+      padding: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--light-gray);
+      border-radius: 8px;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 80, 158, 0.1);
+    }
+
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: var(--light-gray);
+      color: var(--dark);
+    }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: -350px;
+      width: 350px;
+      height: 100%;
+      background: white;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      transition: var(--transition);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .sidebar.active {
+      right: 0;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sidebar-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .sidebar-content {
+      padding: 1.5rem;
+    }
+
+    .calendar-container {
+      margin-bottom: 2rem;
+    }
+
+    .calendar-title {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--primary-dark);
+      text-align: center;
+    }
+
+    .calendar {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .calendar th {
+      background: var(--light);
+      padding: 0.5rem;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .calendar td {
+      padding: 0.5rem;
+      text-align: center;
+      border: 1px solid var(--light-gray);
+      cursor: pointer;
+    }
+
+    .calendar td:hover {
+      background: var(--light);
+    }
+
+    .sidebar-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .sidebar-action {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.8rem 1rem;
+      background: var(--light);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--dark);
+      transition: var(--transition);
+    }
+
+    .sidebar-action:hover {
+      background: var(--primary-light);
+      color: white;
+    }
+
+    /* Footer Styles */
+    footer {
+      background: var(--primary-dark);
+      color: white;
+      padding: 2rem 0;
+      margin-top: auto;
+    }
+
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .footer-text {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .header-container {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .nav-container {
+        flex-direction: column;
+        padding: 1rem;
+      }
+      
+      .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .hero-title {
+        font-size: 2rem;
+      }
+      
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar {
+        width: 100%;
+        right: -100%;
+      }
     }
   </style>
 </head>
-<body onload="showHome()">
+<body>
+  <!-- Header -->
   <header>
-    <!-- Αν δεν είναι συνδεδεμένος ο χρήστης -->
-    <div class="auth-links" sec:authorize="!isAuthenticated()">
-      <a th:href="@{/login}">Log In</a>
-      <a th:href="@{/register}">Sign In</a>
-    </div>
-    <!-- Εάν είναι συνδεδεμένος ο χρήστης, εμφανίζεται το εμφανιζόμενο όνομα (πάνω αριστερά πλέον) -->
-    <div class="profile-info" sec:authorize="isAuthenticated()">
-      <a href="#" style="color: #fff; text-decoration: none;" onclick="openProfileModal(); return false;">
-        <span sec:authentication="principal.username">Χρήστης</span>
-      </a>    
-    </div>
-    <!-- Ο τίτλος με την προσθήκη της κλάσης header-title για πιο εμφανή styling -->
-    <h1 class="header-title">Eropa</h1>
-    <!-- Κουμπί sidebar (fixed, ίδιο background με header) -->
-    <button class="openbtn" onclick="toggleSidebar()">☰</button>
-  </header>
-
-  <nav>
-    <a href="#" class="nav-item" onclick="showHome()">ΑΡΧΙΚΗ</a>
-    <div class="dropdown">
-      <a href="#" class="nav-item">ΤΜΗΜΑΤΑ</a>
-      <div class="dropdown-content">
-        <a href="#" onclick="showDepartment('Οικονομικής Επιστήμης')">Οικονομικής Επιστήμης</a>
-        <a href="#" onclick="showDepartment('Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών')">Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών</a>
-        <a href="#" onclick="showDepartment('Διοικητικής Επιστήμης και Τεχνολογίας')">Διοικητικής Επιστήμης και Τεχνολογίας</a>
-        <a href="#" onclick="showDepartment('Οργάνωσης και Διοίκησης Επιχειρήσεων')">Οργάνωσης και Διοίκησης Επιχειρήσεων</a>
-        <a href="#" onclick="showDepartment('Μάρκετινγκ και Επικοινωνίας')">Μάρκετινγκ και Επικοινωνίας</a>
-        <a href="#" onclick="showDepartment('Στατιστικής')">Στατιστικής</a>
-        <a href="#" onclick="showDepartment('Πληροφορικής')">Πληροφορικής</a>
+    <div class="header-container">
+      <div class="logo-container">
+        <div class="logo">EU</div>
+        <h1 class="header-title">Erasmus+</h1>
+      </div>
+      <div class="auth-section">
+        <!-- Αν δεν είναι συνδεδεμένος ο χρήστης -->
+        <div sec:authorize="!isAuthenticated()">
+          <button class="auth-btn" onclick="window.location.href='/login'">Log In</button>
+          <button class="auth-btn" onclick="window.location.href='/register'">Sign Up</button>
+        </div>
+        <!-- Εάν είναι συνδεδεμένος ο χρήστης -->
+        <div class="user-profile" sec:authorize="isAuthenticated()" onclick="openProfileModal()">
+        
+          <span sec:authentication="principal.username">Χρήστης</span>
+        </div>
       </div>
     </div>
-    <!-- Νέο link "ERASMUS FORUM" που φορτώνει τη σελίδα του forum στο container -->
-    <a href="#" class="nav-item" onclick="showForum()">ERASMUS FORUM</a>
-    <a href="#" class="nav-item" onclick="showApplication()">ΑΙΤΗΣΕΙΣ</a>
+  </header>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container">
+      <ul class="nav-links">
+        <li><a href="#" class="nav-link active" onclick="showHome()">ΑΡΧΙΚΗ</a></li>
+        <li class="dropdown">
+          <a href="#" class="nav-link">ΤΜΗΜΑΤΑ</a>
+          <div class="dropdown-content">
+            <a href="#" class="dropdown-item" onclick="showDepartment('Οικονομικής Επιστήμης')">Οικονομικής Επιστήμης</a>
+            <a href="#" class="dropdown-item" onclick="showDepartment('Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών')">Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών</a>
+            <a href="#" class="dropdown-item" onclick="showDepartment('Διοικητικής Επιστήμης και Τεχνολογίας')">Διοικητικής Επιστήμης και Τεχνολογίας</a>
+            <a href="#" class="dropdown-item" onclick="showDepartment('Οργάνωσης και Διοίκησης Επιχειρήσεων')">Οργάνωσης και Διοίκησης Επιχειρήσεων</a>
+            <a href="#" class="dropdown-item" onclick="showDepartment('Μάρκετινγκ και Επικοινωνίας')">Μάρκετινγκ και Επικοινωνίας</a>
+            <a href="#" class="dropdown-item" onclick="showDepartment('Στατιστικής')">Στατιστικής</a>
+            <a href="#" class="dropdown-item" onclick="showDepartment('Πληροφορικής')">Πληροφορικής</a>
+          </div>
+        </li>
+        <li><a href="#" class="nav-link" onclick="showForum()">ERASMUS FORUM</a></li>
+        <li><a href="#" class="nav-link" onclick="showApplication()">ΑΙΤΗΣΕΙΣ</a></li>
+      </ul>
+      <button class="btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i> Μενού</button>
+    </div>
   </nav>
 
-  <!-- Κεντρικό container για δυναμικό περιεχόμενο -->
-  <div class="container" id="content"></div>
+  <!-- Main Content -->
+  <main class="main-container">
+    <div id="content">
+      <!-- Αρχική σελίδα -->
+      <div class="hero-section">
+        <h1 class="hero-title">Ζήσε την εμπειρία Erasmus+</h1>
+        <p class="hero-subtitle">Ανακαλύψτε νέους πολιτισμούς, αναπτύξτε τις δεξιότητές σας και δημιουργήστε αξέχαστες αναμνήσεις σε κορυφαία πανεπιστήμια της Ευρώπης.</p>
+        <div class="cta-buttons">
+          <button class="cta-button" onclick="showDepartment('Πληροφορικής')">
+            <i class="fas fa-search"></i> Βρες Πανεπιστήμιο
+          </button>
+          <button class="cta-button secondary" onclick="showForum()">
+            <i class="fas fa-comments"></i> Erasmus Forum
+          </button>
+        </div>
+      </div>
 
-  <!-- Forum Modal για "Πες μας για το Πανεπιστήμιο που πήγες" -->
-  <div id="forumModalOverlay" onclick="closeForumModal()"></div>
-  <div id="forumModal">
-    <h2>Πες μας για το Πανεπιστήμιο που πήγες</h2>
-    <form id="forumForm">
-      <label for="forumDepartment">Τμήμα:</label>
-      <select id="forumDepartment" onchange="fetchForumUniversities(this.value)">
-        <option value="">Επιλέξτε Τμήμα</option>
-        <option value="Οικονομικής Επιστήμης">Οικονομικής Επιστήμης</option>
-        <option value="Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών">Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών</option>
-        <option value="Διοικητικής Επιστήμης και Τεχνολογίας">Διοικητικής Επιστήμης και Τεχνολογίας</option>
-        <option value="Οργάνωσης και Διοίκησης Επιχειρήσεων">Οργάνωσης και Διοίκησης Επιχειρήσεων</option>
-        <option value="Μάρκετινγκ και Επικοινωνίας">Μάρκετινγκ και Επικοινωνίας</option>
-        <option value="Στατιστικής">Στατιστικής</option>
-        <option value="Πληροφορικής">Πληροφορικής</option>
-      </select>
-      <br><br>
-      <label for="forumCountry">Χώρα:</label>
-      <select id="forumCountry" onchange="populateForumUniversities(this.value)">
-        <option value="">Επιλέξτε Χώρα</option>
-      </select>
-      <br><br>
-      <label for="forumUniversity">Συνεργαζόμενο Πανεπιστήμιο:</label>
-      <select id="forumUniversity">
-        <option value="">Επιλέξτε Πανεπιστήμιο</option>
-      </select>
-      <br><br>
-      <label for="forumExperience">Εμπειρία:</label>
-      <textarea id="forumExperience" rows="5" placeholder="Γράψτε λίγα λόγια για την εμπειρία σας..."></textarea>
-      <br><br>
-      <button type="button" onclick="submitForumPost()">Υποβολή</button>
-      <button type="button" onclick="closeForumModal()">Κλείσιμο</button>
-    </form>
-  </div>
+      <div class="content-card">
+        <h2 class="section-title">Γιατί να επιλέξεις Erasmus+;</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-globe-europe"></i>
+            </div>
+            <h3 class="feature-title">Διεθνής Εμπειρία</h3>
+            <p class="feature-description">Ζήσε σε μια διαφορετική χώρα, γνώρισε νέους ανθρώπους και εμπλουτίσε την πολιτισμική σου εμπειρία.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h3 class="feature-title">Ακαδημαϊκή Εξέλιξη</h3>
+            <p class="feature-description">Σπουδάσε σε κορυφαία πανεπιστήμια της Ευρώπης και εμπλουτίσε τις γνώσεις σου.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-briefcase"></i>
+            </div>
+            <h3 class="feature-title">Επαγγελματική Προοπτική</h3>
+            <p class="feature-description">Βελτίωσε το βιογραφικό σου με μια διεθνή εμπειρία που εκτιμάται από εργοδότες.</p>
+          </div>
+        </div>
+      </div>
 
-  <!-- Νέο Modal για "Πες μας για την εμπειρία σου με το πρόγραμμα ERASMUS" (χωρίς περιορισμούς) -->
-  <div id="experienceModalOverlay" onclick="closeExperienceModal()"></div>
-  <div id="experienceModal">
-    <h2>Πες μας για την εμπειρία σου με το πρόγραμμα ERASMUS</h2>
-    <form id="experienceForm">
-      <label for="experienceText">Εμπειρία:</label>
-      <textarea id="experienceText" rows="5" placeholder="Γράψε την εμπειρία σου εδώ..."></textarea>
-      <br><br>
-      <button type="button" onclick="submitExperience()">Υποβολή Εμπειρίας</button>
-      <button type="button" onclick="closeExperienceModal()">Κλείσιμο</button>
-    </form>
-  </div>
-
-    <!-- Νέο Modal για "Ανέβασε μια φωτογραφία απο την αξέχαστη εμπειρία σου" -->
-    <div id="uploadPhotoModalOverlay" onclick="closeUploadPhotoModal()"></div>
-    <div id="uploadPhotoModal">
-      <h2>Ανέβασε μια φωτογραφία απο την αξέχαστη εμπειρία σου</h2>
-      <form id="uploadPhotoForm">
-        <label for="photoCaption">Λεζάντα:</label>
-        <input type="text" id="photoCaption" placeholder="Γράψε λεζάντα για τη φωτογραφία" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px;">
-        <br><br>
-        <label for="photoFile" class="custom-file-label">Choose File</label>
-        <input type="file" id="photoFile" accept="image/*">
-        <br><br>
-        <button type="button" onclick="submitPhotoExperience()">Υποβολή Φωτογραφίας</button>
-        <button type="button" onclick="closeUploadPhotoModal()">Κλείσιμο</button>
-      </form>
+      <div class="content-card">
+        <h2 class="section-title">Πρόσφατες Εμπειρίες Φοιτητών</h2>
+        <div id="studentComments">
+          <!-- Τα σχόλια θα εμφανιστούν εδώ -->
+        </div>
+      </div>
     </div>
+  </main>
 
-  <!-- Info Modal Overlay -->
-  <div id="infoModalOverlay" onclick="closeUniversityInfoModal()"></div>
-  <!-- Info Modal (για πληροφορίες πανεπιστημίου) -->
-  <div id="infoModal">
-    <h2 id="infoTitle"></h2>
-    <p id="infoCity"></p>
-    <p id="infoDescription"></p>
-    <div id="infoComments"></div>
-    <br>
-    <button onclick="showCommentsInInfoModal()">Δείτε Σχόλια</button>
-    <button onclick="openCoursesPage()">Δες τα μαθήματα</button>
-    <button onclick="closeUniversityInfoModal()">Κλείσιμο</button>
+  <!-- Forum Modal -->
+  <div class="modal-overlay" id="forumModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Πες μας για το Πανεπιστήμιο που πήγες</h2>
+        <button class="modal-close" onclick="closeForumModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="forumForm">
+          <div class="form-group">
+            <label class="form-label" for="forumDepartment">Τμήμα:</label>
+            <select class="form-control" id="forumDepartment" onchange="fetchForumUniversities(this.value)">
+              <option value="">Επιλέξτε Τμήμα</option>
+              <option value="Οικονομικής Επιστήμης">Οικονομικής Επιστήμης</option>
+              <option value="Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών">Διεθνών και Ευρωπαϊκών Οικονομικών Σπουδών</option>
+              <option value="Διοικητικής Επιστήμης και Τεχνολογίας">Διοικητικής Επιστήμης και Τεχνολογίας</option>
+              <option value="Οργάνωσης και Διοίκησης Επιχειρήσεων">Οργάνωσης και Διοίκησης Επιχειρήσεων</option>
+              <option value="Μάρκετινγκ και Επικοινωνίας">Μάρκετινγκ και Επικοινωνίας</option>
+              <option value="Στατιστικής">Στατιστικής</option>
+              <option value="Πληροφορικής">Πληροφορικής</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="forumCountry">Χώρα:</label>
+            <select class="form-control" id="forumCountry" onchange="populateForumUniversities(this.value)">
+              <option value="">Επιλέξτε Χώρα</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="forumUniversity">Συνεργαζόμενο Πανεπιστήμιο:</label>
+            <select class="form-control" id="forumUniversity">
+              <option value="">Επιλέξτε Πανεπιστήμιο</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="forumExperience">Εμπειρία:</label>
+            <textarea class="form-control form-textarea" id="forumExperience" placeholder="Γράψτε λίγα λόγια για την εμπειρία σας..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeForumModal()">Κλείσιμο</button>
+            <button type="button" class="btn btn-primary" onclick="submitForumPost()">Υποβολή</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 
-  <!-- Profile Modal Overlay -->
-  <div id="profileModalOverlay" onclick="closeProfileModal()"></div>
+  <!-- New Question Modal -->
+  <div class="modal-overlay" id="questionModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Κάνε μια νέα ερώτηση</h2>
+        <button class="modal-close" onclick="closeQuestionModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="questionForm">
+          <div class="form-group">
+            <label class="form-label" for="questionTitle">Τίτλος ερώτησης:</label>
+            <input type="text" class="form-control" id="questionTitle" placeholder="Γράψτε τον τίτλο της ερώτησής σας...">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="questionBody">Ερώτηση:</label>
+            <textarea class="form-control form-textarea" id="questionBody" placeholder="Γράψτε την ερώτησή σας εδώ..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeQuestionModal()">Κλείσιμο</button>
+            <button type="button" class="btn btn-primary" onclick="submitForumQuestion()">Υποβολή Ερώτησης</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Experience Modal -->
+  <div class="modal-overlay" id="experienceModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Πες μας για την εμπειρία σου με το πρόγραμμα ERASMUS</h2>
+        <button class="modal-close" onclick="closeExperienceModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="experienceForm">
+          <div class="form-group">
+            <label class="form-label" for="experienceText">Εμπειρία:</label>
+            <textarea class="form-control form-textarea" id="experienceText" placeholder="Γράψε την εμπειρία σου εδώ..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeExperienceModal()">Κλείσιμο</button>
+            <button type="button" class="btn btn-primary" onclick="submitExperience()">Υποβολή Εμπειρίας</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Profile Modal -->
-  <div id="profileModal">
-    <h2>Προφίλ Χρήστη</h2>
-    <form id="profileForm">
-      <label for="profileFirstName">Όνομα:</label>
-      <input type="text" id="profileFirstName" placeholder="Κενό">
-      <br><br>
-      <label for="profileLastName">Επίθετο:</label>
-      <input type="text" id="profileLastName" placeholder="Κενό">
-      <br><br>
-      <label for="profileDepartment">Τμήμα:</label>
-      <input type="text" id="profileDepartment" placeholder="Κενό">
-      <br><br>
-      <label for="profileYear">Έτος Φοίτησης:</label>
-      <input type="text" id="profileYear" placeholder="Κενό">
-      <br><br>
-      <button type="button" onclick="saveProfile()">Αποθήκευση</button>
-      <button type="button" onclick="closeProfileModal()">Κλείσιμο</button>
-    </form>
-  </div>
-
-  <!-- Sidebar (δεξιά) με το ημερολόγιο -->
-  <div id="mySidebar" class="sidebar">
-    <span class="closebtn" onclick="toggleSidebar()">&times;</span>
-    <div class="calendar-container">
-      <div class="calendar-title">March 2025</div>
-      <table class="calendar">
-        <thead>
-          <tr>
-            <th>M</th>
-            <th>T</th>
-            <th>W</th>
-            <th>T</th>
-            <th>F</th>
-            <th>S</th>
-            <th>S</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-            <td>4</td>
-            <td>5</td>
-            <td>6</td>
-            <td>7</td>
-          </tr>
-          <tr>
-            <td>8</td>
-            <td>9</td>
-            <td>10</td>
-            <td>11</td>
-            <td>12</td>
-            <td>13</td>
-            <td>14</td>
-          </tr>
-          <tr>
-            <td>15</td>
-            <td>16</td>
-            <td>17</td>
-            <td>18</td>
-            <td>19</td>
-            <td>20</td>
-            <td>21</td>
-          </tr>
-          <tr>
-            <td>22</td>
-            <td>23</td>
-            <td>24</td>
-            <td>25</td>
-            <td>26</td>
-            <td>27</td>
-            <td>28</td>
-          </tr>
-          <tr>
-            <td>29</td>
-            <td>30</td>
-            <td>31</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="sidebar-buttons" style="padding: 20px; text-align: center;">
-      <button type="button" onclick="openProfileModal()" style="display: block; margin: 10px auto; width: 90%;">Το προφίλ μου</button>
-      <button onclick="redirectToDeclarations()" style="display: block; margin: 10px auto; width: 90%;">Οι δηλώσεις μου</button>
-      <button onclick="redirectToSettings()" style="display: block; margin: 10px auto; width: 90%;">Ρυθμίσεις</button>
-      <button onclick="signOut()" style="display: block; margin: 10px auto; width: 90%;">Sign out</button>
+  <div class="modal-overlay" id="profileModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Προφίλ Χρήστη</h2>
+        <button class="modal-close" onclick="closeProfileModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="profileForm">
+          <div class="form-group">
+            <label class="form-label" for="profileFirstName">Όνομα:</label>
+            <input type="text" class="form-control" id="profileFirstName" placeholder="Κενό">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="profileLastName">Επίθετο:</label>
+            <input type="text" class="form-control" id="profileLastName" placeholder="Κενό">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="profileDepartment">Τμήμα:</label>
+            <input type="text" class="form-control" id="profileDepartment" placeholder="Κενό">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="profileYear">Έτος Φοίτησης:</label>
+            <input type="text" class="form-control" id="profileYear" placeholder="Κενό">
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeProfileModal()">Κλείσιμο</button>
+            <button type="button" class="btn btn-primary" onclick="saveProfile()">Αποθήκευση</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h3>Μενού Χρήστη</h3>
+      <button class="sidebar-close" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <div class="sidebar-content">
+      <div class="calendar-container">
+        <h4 class="calendar-title">Μάρτιος 2025</h4>
+        <table class="calendar">
+          <thead>
+            <tr>
+              <th>Δ</th>
+              <th>T</th>
+              <th>T</th>
+              <th>Π</th>
+              <th>Π</th>
+              <th>Σ</th>
+              <th>Κ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>2</td>
+              <td>3</td>
+              <td>4</td>
+              <td>5</td>
+              <td>6</td>
+              <td>7</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>9</td>
+              <td>10</td>
+              <td>11</td>
+              <td>12</td>
+              <td>13</td>
+              <td>14</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td>16</td>
+              <td>17</td>
+              <td>18</td>
+              <td>19</td>
+              <td>20</td>
+              <td>21</td>
+            </tr>
+            <tr>
+              <td>22</td>
+              <td>23</td>
+              <td>24</td>
+              <td>25</td>
+              <td>26</td>
+              <td>27</td>
+              <td>28</td>
+            </tr>
+            <tr>
+              <td>29</td>
+              <td>30</td>
+              <td>31</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sidebar-actions">
+        <a href="#" class="sidebar-action" onclick="openProfileModal(); toggleSidebar();">
+          <i class="fas fa-user"></i> Το προφίλ μου
+        </a>
+        <a href="#" class="sidebar-action" onclick="redirectToDeclarations(); toggleSidebar();">
+          <i class="fas fa-file-alt"></i> Οι δηλώσεις μου
+        </a>
+        <a href="#" class="sidebar-action" onclick="redirectToSettings(); toggleSidebar();">
+          <i class="fas fa-cog"></i> Ρυθμίσεις
+        </a>
+        <a href="#" class="sidebar-action" onclick="signOut(); toggleSidebar();">
+          <i class="fas fa-sign-out-alt"></i> Αποσύνδεση
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
   <footer>
-    <p>&copy; 2025 Οικονομικό Πανεπιστήμιο Αθηνών</p>
+    <div class="footer-container">
+      <div class="footer-logo">Erasmus+</div>
+      <div class="footer-text">&copy; 2025 Οικονομικό Πανεπιστήμιο Αθηνών</div>
+    </div>
   </footer>
 
   <script>
-    // Ανάκτηση των τιμών CSRF από τα meta tags
+    // CSRF Token
     const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
 
@@ -672,12 +1138,201 @@
     let currentDepartment = "";
     let selectedUniversity = "";
 
+    // Αρχικοποίηση
+    document.addEventListener('DOMContentLoaded', function() {
+      showHome();
+    });
+
+    // Συναρτήσεις για τα modals
+    function openForumModal() {
+      document.getElementById('forumModalOverlay').classList.add('active');
+    }
+
+    function closeForumModal() {
+      document.getElementById('forumModalOverlay').classList.remove('active');
+    }
+
+    function openQuestionModal() {
+      document.getElementById('questionModalOverlay').classList.add('active');
+    }
+
+    function closeQuestionModal() {
+      document.getElementById('questionModalOverlay').classList.remove('active');
+    }
+
+    function openExperienceModal() {
+      document.getElementById('experienceModalOverlay').classList.add('active');
+    }
+
+    function closeExperienceModal() {
+      document.getElementById('experienceModalOverlay').classList.remove('active');
+    }
+
+    function openProfileModal() {
+      document.getElementById('profileModalOverlay').classList.add('active');
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileModalOverlay').classList.remove('active');
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    // Συναρτήσεις για την πλοήγηση
+    function showHome() {
+      document.getElementById('content').innerHTML = `
+        <div class="hero-section">
+          <h1 class="hero-title">Ζήσε την εμπειρία Erasmus+</h1>
+          <p class="hero-subtitle">Ανακαλύψτε νέους πολιτισμούς, αναπτύξτε τις δεξιότητές σας και δημιουργήστε αξέχαστες αναμνήσεις σε κορυφαία πανεπιστήμια της Ευρώπης.</p>
+          <div class="cta-buttons">
+            <button class="cta-button" onclick="showDepartment('Πληροφορικής')">
+              <i class="fas fa-search"></i> Βρες Πανεπιστήμιο
+            </button>
+            <button class="cta-button secondary" onclick="showForum()">
+              <i class="fas fa-comments"></i> Erasmus Forum
+            </button>
+          </div>
+        </div>
+
+        <div class="content-card">
+          <h2 class="section-title">Γιατί να επιλέξεις Erasmus+;</h2>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-globe-europe"></i>
+              </div>
+              <h3 class="feature-title">Διεθνής Εμπειρία</h3>
+              <p class="feature-description">Ζήσε σε μια διαφορετική χώρα, γνώρισε νέους ανθρώπους και εμπλουτίσε την πολιτισμική σου εμπειρία.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-graduation-cap"></i>
+              </div>
+              <h3 class="feature-title">Ακαδημαϊκή Εξέλιξη</h3>
+              <p class="feature-description">Σπουδάσε σε κορυφαία πανεπιστήμια της Ευρώπης και εμπλουτίσε τις γνώσεις σου.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-briefcase"></i>
+              </div>
+              <h3 class="feature-title">Επαγγελματική Προοπτική</h3>
+              <p class="feature-description">Βελτίωσε το βιογραφικό σου με μια διεθνή εμπειρία που εκτιμάται από εργοδότες.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-card">
+          <h2 class="section-title">Πρόσφατες Εμπειρίες Φοιτητών</h2>
+          <div id="studentComments">
+            <!-- Τα σχόλια θα εμφανιστούν εδώ -->
+          </div>
+        </div>
+      `;
+      loadHomeComments();
+    }
+
+    async function showDepartment(name) {
+      currentDepartment = name;
+      document.getElementById('content').innerHTML = `
+        <div class="content-card">
+          <h2 class="section-title">${name}</h2>
+          <p>Επιλέξτε χώρα για να δείτε τα συνεργαζόμενα πανεπιστήμια.</p>
+          <div class="department-selector">
+            <button class="department-btn active">${name}</button>
+          </div>
+          <div class="form-group">
+            <select class="form-control" id="countrySelect" onchange="showUniversitiesByCountry()">
+              <option value="">Επιλέξτε χώρα</option>
+            </select>
+          </div>
+          <div id="tableContainer">
+            <h3>Συνεργαζόμενα Πανεπιστήμια</h3>
+            <table class="university-table" id="universityTable">
+              <thead>
+                <tr>
+                  <th>Πανεπιστήμια</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Πανεπιστήμια θα εμφανιστούν εδώ -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+      await fetchUniversities(name);
+    }
+
+    function showForum() {
+      document.getElementById('content').innerHTML = `
+        <div class="content-card">
+          <h2 class="section-title">Erasmus Forum</h2>
+          <p>Μοιράσου την εμπειρία σου και μάθε από άλλους φοιτητές.</p>
+          <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+            <button class="btn btn-primary" onclick="openQuestionModal()">
+              <i class="fas fa-plus"></i> Νέα Ερώτηση
+            </button>
+            <button class="btn btn-secondary" onclick="openForumModal()">
+              <i class="fas fa-share"></i> Μοιράσου Εμπειρία
+            </button>
+          </div>
+          <div class="forum-posts" id="forumContainer">
+            <!-- Δημοσιεύσεις θα εμφανιστούν εδώ -->
+          </div>
+        </div>
+      `;
+      loadForumPosts();
+    }
+
+    function showApplication() {
+      document.getElementById('content').innerHTML = `
+        <div class="content-card">
+          <h2 class="section-title">Φτιάξε την αίτησή σου</h2>
+          <p>Εδώ μπορείτε να δημιουργήσετε την αίτησή σας για το πρόγραμμα Erasmus.</p>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-file-alt"></i>
+              </div>
+              <h3 class="feature-title">Αίτηση Erasmus</h3>
+              <p class="feature-description">Συμπλήρωσε την αίτησή σου για το πρόγραμμα Erasmus+.</p>
+              <button class="btn btn-primary" style="margin-top: 1rem;">Συμπλήρωση Αίτησης</button>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <h3 class="feature-title">Κριτήρια Επιλογής</h3>
+              <p class="feature-description">Μάθε τα κριτήρια επιλογής για το πρόγραμμα Erasmus+.</p>
+              <button class="btn btn-primary" style="margin-top: 1rem;">Δες τα Κριτήρια</button>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-question-circle"></i>
+              </div>
+              <h3 class="feature-title">Βοήθεια & Οδηγίες</h3>
+              <p class="feature-description">Βρες βοήθεια και οδηγίες για τη συμπλήρωση της αίτησής σου.</p>
+              <button class="btn btn-primary" style="margin-top: 1rem;">Οδηγίες</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Συναρτήσεις για τα πανεπιστήμια - Τώρα χρησιμοποιούν τα πραγματικά endpoints
     async function fetchUniversities(department) {
       try {
         const url = '/api/universities?department=' + encodeURIComponent(department);
         const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        
         universitiesByCountry = await response.json();
-        console.log("Fetched universities:", universitiesByCountry);
+        
         const countrySelect = document.getElementById("countrySelect");
         if (countrySelect) {
           countrySelect.innerHTML = '<option value="">Επιλέξτε χώρα</option>';
@@ -690,6 +1345,7 @@
         }
       } catch (error) {
         console.error("Σφάλμα φόρτωσης δεδομένων:", error);
+        alert("Σφάλμα φόρτωσης δεδομένων πανεπιστημίων. Παρακαλώ δοκιμάστε ξανά.");
       }
     }
 
@@ -697,8 +1353,13 @@
       try {
         const url = '/api/universities?department=' + encodeURIComponent(department);
         const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        
         forumUniversitiesByCountry = await response.json();
-        console.log("Fetched forum universities:", forumUniversitiesByCountry);
+        
         const forumCountrySelect = document.getElementById("forumCountry");
         if (forumCountrySelect) {
           forumCountrySelect.innerHTML = '<option value="">Επιλέξτε Χώρα</option>';
@@ -711,6 +1372,7 @@
         }
       } catch (error) {
         console.error("Σφάλμα φόρτωσης δεδομένων για το forum:", error);
+        alert("Σφάλμα φόρτωσης δεδομένων πανεπιστημίων. Παρακαλώ δοκιμάστε ξανά.");
       }
     }
 
@@ -727,73 +1389,22 @@
       }
     }
 
-    function showHome() {
-      document.getElementById("content").innerHTML = `
-        <hr>
-        <h2>Πρόγραμμα Erasmus+</h2>
-        <p>
-          Αναζητάς μια εμπειρία που θα μεταμορφώσει τη ζωή σου; Το πρόγραμμα Erasmus σου προσφέρει την ευκαιρία 
-          να σπουδάσεις σε κορυφαία πανεπιστήμια της Ευρώπης, να αναπτύξεις τις γλωσσικές σου δεξιότητες 
-          και να γνωρίσεις νέους ανθρώπους από κάθε γωνιά του κόσμου. Εδώ θα ανακαλύψεις διαφορετικούς πολιτισμούς, 
-          θα δημιουργήσεις αξέχαστες φιλίες και θα εμπλουτίσεις το βιογραφικό σου με μοναδικές εμπειρίες. 
-          Κάθε στιγμή θα είναι γεμάτη μάθηση και προσωπική εξέλιξη. Μην αφήνεις αυτήν την ευκαιρία να περάσει 
-          αναξιοποίητη – κάνε το πρώτο βήμα προς ένα λαμπρό μέλλον και ζήσε την αξέχαστη εμπειρία του Erasmus!
-        </p>
-        <br><br>
-        <!-- Κοντέινερ με flex layout για να εμφανίζονται οριζόντια -->
-        <img src="/images/airplane.png" style="width: 100%; height: 250px; display: block;">
-        <div class="button-container">
-          <button class="custom-button" onclick="openForumModal()">
-            Πες μας για το Πανεπιστήμιο που πήγες!!
-          </button>
-          <button class="custom-button" onclick="openExperienceModal()">
-            Πες μας για την εμπειρία σου με το πρόγραμμα ERASMUS
-          </button>
-          <button class="custom-button" onclick="openUploadPhotoModal()">
-            Ανέβασε μια φωτογραφία απο την αξέχαστη εμπειρία σου
-          </button>
-        </div>
-        <h2>Ακόμα σκεφτεσαι να πας ERASMUS;;</h2>
-        <div id="studentComments"></div>
-      `;
-      loadHomeComments();
-    }
-
-    async function showDepartment(name) {
-      currentDepartment = name;
-      document.getElementById("content").innerHTML = `
-        <h2>${name}</h2>
-        <p>Επιλέξτε χώρα για να δείτε τα συνεργαζόμενα πανεπιστήμια.</p>
-        <div class="select-container">
-          <select id="countrySelect" onchange="showUniversitiesByCountry()">
-            <option value="">Επιλέξτε χώρα</option>
-          </select>
-        </div>
-        <div class="table-container" id="tableContainer">
-          <h3>Συνεργαζόμενα Πανεπιστήμια</h3>
-          <table id="universityTable">
-            <tr>
-              <th>Πανεπιστήμια</th>
-            </tr>
-          </table>
-        </div>
-        <div id="forumCommentsContainer"></div>
-      `;
-      await fetchUniversities(name);
-    }
-
     function showUniversitiesByCountry() {
       const country = document.getElementById("countrySelect").value;
       const tableContainer = document.getElementById("tableContainer");
       const universityTable = document.getElementById("universityTable");
 
-      universityTable.innerHTML = `<tr><th>Πανεπιστήμια</th></tr>`;
+      // Κρατάμε μόνο το header
+      universityTable.innerHTML = `<thead><tr><th>Πανεπιστήμια</th></tr></thead><tbody></tbody>`;
+      
       if (country === "" || !universitiesByCountry[country]) {
         tableContainer.style.display = "none";
         return;
       }
+      
+      const tbody = universityTable.querySelector('tbody');
       universitiesByCountry[country].forEach(university => {
-        const row = universityTable.insertRow();
+        const row = tbody.insertRow();
         const cell = row.insertCell(0);
         cell.textContent = university;
         row.style.cursor = "pointer";
@@ -804,207 +1415,140 @@
       tableContainer.style.display = "block";
     }
 
-
     async function openUniversityInfoModal(university) {
       selectedUniversity = university;
-      const modal = document.getElementById("infoModal");
-      const overlay = document.getElementById("infoModalOverlay");
+      
       try {
         const response = await fetch(`/api/universityInfo?university=${encodeURIComponent(university)}`);
-        const info = await response.json();
-        document.getElementById("infoTitle").textContent = university;
-        document.getElementById("infoCity").textContent = `Πόλη: ${info.city}`;
-        document.getElementById("infoDescription").innerHTML = info.description;
-        document.getElementById("infoComments").innerHTML = "";
-      } catch (error) {
-        console.error("Σφάλμα φόρτωσης πληροφοριών πανεπιστημίου:", error);
-        document.getElementById("infoTitle").textContent = university;
-        document.getElementById("infoCity").textContent = "Πόλη: -";
-        document.getElementById("infoDescription").innerHTML = "Δεν υπάρχουν καταχωρημένες πληροφορίες για αυτό το πανεπιστήμιο.";
-      }
-      // Εμφανίζουμε το modal και το overlay
-      modal.style.display = "block";
-      overlay.style.display = "block";
-      // Με μικρό timeout ενεργοποιούμε τις μεταβάσεις (opacity και transform)
-      setTimeout(() => {
-        modal.style.opacity = "1";
-        modal.style.transform = "translate(-50%, -50%) scale(1)";
-        overlay.style.opacity = "1";
-      }, 10);
-    }
-
-
-    function closeUniversityInfoModal() {
-      const modal = document.getElementById("infoModal");
-      const overlay = document.getElementById("infoModalOverlay");
-      modal.classList.remove("show-modal");
-      overlay.classList.remove("show-overlay");
-    }
-
-    async function showCommentsInInfoModal() {
-      try {
-        const response = await fetch(`/api/forumPosts?department=${encodeURIComponent(currentDepartment)}&university=${encodeURIComponent(selectedUniversity)}`);
-        const posts = await response.json();
-        const commentsDiv = document.getElementById("infoComments");
-        commentsDiv.innerHTML = `<h4>Σχόλια για ${selectedUniversity}</h4>`;
-        if (posts.length === 0) {
-          commentsDiv.innerHTML += `<p>Δεν υπάρχουν ακόμα σχόλια για αυτό το πανεπιστήμιο.</p>`;
-        } else {
-          posts.forEach(post => {
-            const postDiv = document.createElement("div");
-            postDiv.innerHTML = `<strong>${post.username}</strong> - ${new Date(post.timestamp).toLocaleString()}<br>${post.experience}<hr>`;
-            commentsDiv.appendChild(postDiv);
-          });
-        }
-      } catch (error) {
-        console.error("Σφάλμα φόρτωσης σχολίων:", error);
-      }
-    }
-
-    async function submitForumPost() {
-      const department = document.getElementById('forumDepartment').value;
-      const university = document.getElementById('forumUniversity').value;
-      const experience = document.getElementById('forumExperience').value;
-      const data = { type: 'experience', department, university, experience };
-      try {
-        const response = await fetch('/api/forumPosts', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            [csrfHeader]: csrfToken
-          },
-          body: JSON.stringify(data)
-        });
-        if (response.ok) {
-          alert('Η εμπειρία σας καταχωρήθηκε επιτυχώς.');
-          closeForumModal();
-          loadHomeComments();
-        } else {
-          alert('Παρουσιάστηκε σφάλμα κατά την καταχώρηση.');
-        }
-      } catch (error) {
-        console.error(error);
-        alert('Σφάλμα κατά την αποστολή της εμπειρίας.');
-      }
-    }
-
-    // Νέες συναρτήσεις για το Forum
-    function showForum() {
-      document.getElementById("content").innerHTML = `
-        <style>
-          @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-          }
-          .forum-title {
-            text-align: center;
-            font-size: 42px;
-            color: #002147;
-            margin-bottom: 30px;
-            font-weight: bold;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-          }
-          .forum-subtitle {
-            text-align: center;
-            font-size: 26px;
-            color: #00509e;
-            margin-bottom: 30px;
-          }
-          .forum-form {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-          }
-          .forum-input, .forum-textarea {
-            width: 100%;
-            padding: 18px;
-            font-size: 18px;
-            border: 2px solid #ddd;
-            border-radius: 12px;
-            transition: border-color 0.3s;
-            outline: none;
-          }
-          .forum-input:focus, .forum-textarea:focus {
-            border-color: #00509e;
-          }
-          .forum-button {
-            align-self: center;
-            padding: 18px 36px;
-            font-size: 20px;
-            background: linear-gradient(135deg, #00509e, #0073e6);
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-          }
-          .forum-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-          }
-        </style>
-        <div class="forum-container">
-          <h2 class="forum-title">ERASMUS FORUM</h2>
-          <div id="forumContainer" style="margin-bottom: 40px;"></div>
-          <h3 class="forum-subtitle">Κάνε μια ερώτηση</h3>
-          <form id="forumQuestionForm" class="forum-form">
-            <input type="text" id="questionTitle" placeholder="Τίτλος ερώτησης" required class="forum-input">
-            <textarea id="questionBody" rows="5" placeholder="Γράψε την ερώτησή σου εδώ" required class="forum-textarea"></textarea>
-            <button type="button" onclick="submitForumQuestion()" class="forum-button">
-              Υποβολή Ερώτησης
-            </button>
-          </form>
-        </div>
-      `;
-      loadForumPosts();
-    }
-
-    async function loadForumPosts() {
-      try {
-        const response = await fetch('/api/forumPosts');
+        
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        const posts = await response.json();
-        let html = '';
-        if (posts.length === 0) {
-          html = '<p>Δεν υπάρχουν ερωτήσεις ακόμα.</p>';
-        } else {
-          posts.forEach(post => {
-            html += `<div class="forum-post" id="post-${post.id}" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
-                <h3>${post.title}</h3>
-                <p>${post.body}</p>
-                <p><em>Από: ${post.username} - ${new Date(post.timestamp).toLocaleString()}</em></p>
-                <p id="post-like-count-${post.id}">Likes: ${post.likeCount}</p>
-                <button id="post-like-button-${post.id}" class="like-button" onclick="toggleLikePost(${post.id})"></button>
-                <button onclick="toggleReplyForm(${post.id})">Απάντηση</button>
-                <div class="reply-form" id="reply-form-${post.id}" style="display:none; margin-top:10px;">
-                  <textarea id="reply-text-${post.id}" rows="3" placeholder="Γράψτε την απάντησή σας..."></textarea>
-                  <br>
-                  <button onclick="submitForumReply(${post.id})">Υποβολή Απάντησης</button>
+        
+        const info = await response.json();
+        
+        // Δημιουργία modal για πληροφορίες πανεπιστημίου
+        const modalHTML = `
+          <div class="modal-overlay active" id="universityModalOverlay">
+            <div class="modal">
+              <div class="modal-header">
+                <h2 class="modal-title">${university}</h2>
+                <button class="modal-close" onclick="closeUniversityModal()">&times;</button>
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                  <label class="form-label">Πόλη:</label>
+                  <p>${info.city || 'Δεν υπάρχουν πληροφορίες'}</p>
                 </div>
-                <div class="replies" id="replies-${post.id}" style="margin-top:10px;">`;
-            if (post.replies && post.replies.length > 0) {
-              post.replies.forEach(reply => {
-                html += `<div style="border-top: 1px dashed #ccc; padding-top: 10px; margin-top: 10px;">
-                    <p>${reply.reply}</p>
-                    <p><em>Από: ${reply.username} - ${new Date(reply.timestamp).toLocaleString()}</em></p>
-                    <p id="reply-like-count-${reply.id}">Likes: ${reply.likeCount}</p>
-                    <button onclick="likeReply(${reply.id})">Like</button>
-                  </div>`;
-              });
-            } else {
-              html += `<p style="font-style: italic;">Δεν υπάρχουν απαντήσεις.</p>`;
-            }
-            html += `</div></div>`;
-          });
+                <div class="form-group">
+                  <label class="form-label">Περιγραφή:</label>
+                  <p>${info.description || 'Δεν υπάρχει περιγραφή'}</p>
+                </div>
+                <div class="form-actions">
+                  <button class="btn btn-primary" onclick="showCommentsInInfoModal()">Δείτε Σχόλια</button>
+                  <button class="btn btn-secondary" onclick="openCoursesPage()">Δες τα μαθήματα</button>
+                  <button class="btn btn-secondary" onclick="closeUniversityModal()">Κλείσιμο</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Προσθήκη του modal στο DOM
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = modalHTML;
+        document.body.appendChild(modalContainer);
+        
+      } catch (error) {
+        console.error("Σφάλμα φόρτωσης πληροφοριών πανεπιστημίου:", error);
+        alert("Δεν ήταν δυνατή η φόρτωση των πληροφοριών για το πανεπιστήμιο.");
+      }
+    }
+
+    function closeUniversityModal() {
+      const modal = document.getElementById('universityModalOverlay');
+      if (modal) {
+        modal.remove();
+      }
+    }
+
+    // Συναρτήσεις για το Forum - Τώρα χρησιμοποιούν τα πραγματικά endpoints
+    async function loadForumPosts() {
+      try {
+        const response = await fetch('/api/forumPosts');
+        
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
-        document.getElementById("forumContainer").innerHTML = html;
+        
+        const posts = await response.json();
+        displayForumPosts(posts);
       } catch (error) {
         console.error("Σφάλμα φόρτωσης forum posts:", error);
         document.getElementById("forumContainer").innerHTML = "<p>Σφάλμα φόρτωσης forum posts.</p>";
       }
+    }
+
+    function displayForumPosts(posts) {
+      const forumContainer = document.getElementById("forumContainer");
+      let html = '';
+      
+      if (posts.length === 0) {
+        html = '<p>Δεν υπάρχουν ερωτήσεις ακόμα.</p>';
+      } else {
+        posts.forEach(post => {
+          html += `
+            <div class="forum-post" id="post-${post.id}">
+              <div class="post-header">
+                <div class="post-author">
+                  <div class="post-avatar">${post.username ? post.username.charAt(0) : 'U'}</div>
+                  <div>
+                    <strong>${post.username || 'Άγνωστος χρήστης'}</strong>
+                    <div style="font-size: 0.8rem; color: var(--gray);">${new Date(post.timestamp).toLocaleDateString('el-GR')}</div>
+                  </div>
+                </div>
+              </div>
+              <h3 class="post-title">${post.title || 'Χωρίς τίτλο'}</h3>
+              <p>${post.body || post.experience || 'Χωρίς περιεχόμενο'}</p>
+              <div class="post-actions">
+                <button class="action-btn" onclick="toggleLikePost(${post.id})">
+                  <i class="fas fa-thumbs-up"></i> ${post.likeCount || 0}
+                </button>
+                <button class="action-btn" onclick="toggleReplyForm(${post.id})">
+                  <i class="fas fa-reply"></i> Απάντηση
+                </button>
+              </div>
+              <div class="reply-form" id="reply-form-${post.id}" style="display:none;">
+                <textarea class="form-control" id="reply-text-${post.id}" rows="3" placeholder="Γράψτε την απάντησή σας..."></textarea>
+                <div class="form-actions" style="margin-top: 1rem;">
+                  <button class="btn btn-primary" onclick="submitForumReply(${post.id})">Υποβολή Απάντησης</button>
+                </div>
+              </div>
+              <div class="replies" id="replies-${post.id}">
+          `;
+          
+          if (post.replies && post.replies.length > 0) {
+            post.replies.forEach(reply => {
+              html += `
+                <div class="reply-item">
+                  <div class="post-author">
+                    <div class="post-avatar" style="width: 30px; height: 30px; font-size: 0.8rem;">${reply.username ? reply.username.charAt(0) : 'U'}</div>
+                    <div>
+                      <strong>${reply.username || 'Άγνωστος χρήστης'}</strong>
+                      <div style="font-size: 0.8rem; color: var(--gray);">${new Date(reply.timestamp).toLocaleDateString('el-GR')}</div>
+                    </div>
+                  </div>
+                  <p style="margin-top: 0.5rem;">${reply.reply || reply.body || 'Χωρίς περιεχόμενο'}</p>
+                </div>
+              `;
+            });
+          }
+          
+          html += `</div></div>`;
+        });
+      }
+      
+      forumContainer.innerHTML = html;
     }
 
     function toggleReplyForm(postId) {
@@ -1019,7 +1563,18 @@
     async function submitForumQuestion() {
       const title = document.getElementById("questionTitle").value;
       const body = document.getElementById("questionBody").value;
-      const data = { type: 'question', title, body };
+      
+      if (!title || !body) {
+        alert("Παρακαλώ συμπληρώστε τίτλο και περιεχόμενο της ερώτησης.");
+        return;
+      }
+      
+      const data = { 
+        type: 'question', 
+        title: title, 
+        body: body 
+      };
+      
       try {
         const response = await fetch('/api/forumPosts', {
           method: 'POST',
@@ -1029,29 +1584,28 @@
           },
           body: JSON.stringify(data)
         });
+        
         if (response.ok) {
           alert("Η ερώτησή σας καταχωρήθηκε επιτυχώς.");
-          // Προσθέτουμε μια μικρή καθυστέρηση πριν ανανεώσουμε το forum
-          setTimeout(() => {
-            showForum();
-          }, 100);
+          closeQuestionModal();
+          showForum();
         } else {
           alert("Παρουσιάστηκε σφάλμα κατά την καταχώρηση της ερώτησης.");
         }
       } catch (error) {
         console.error("Σφάλμα κατά την υποβολή της ερώτησης:", error);
+        alert("Σφάλμα κατά την υποβολή της ερώτησης.");
       }
     }
 
-
     async function submitForumReply(postId) {
-      if (!postId) {
-        alert("Σφάλμα: Δεν υπάρχει έγκυρο postId.");
-        return;
-      }
       const replyText = document.getElementById("reply-text-" + postId).value;
       
-      // Ετοιμάζουμε τα δεδομένα ως JSON
+      if (!replyText) {
+        alert("Παρακαλώ συμπληρώστε την απάντησή σας.");
+        return;
+      }
+      
       const data = {
         postId: postId,
         reply: replyText
@@ -1067,25 +1621,37 @@
           body: JSON.stringify(data)
         });
 
-        if (!response.ok) {
-          throw new Error("Reply submission failed");
+        if (response.ok) {
+          document.getElementById("reply-text-" + postId).value = "";
+          toggleReplyForm(postId);
+          showForum();
+          alert("Η απάντησή σας καταχωρήθηκε επιτυχώς!");
+        } else {
+          alert("Παρουσιάστηκε σφάλμα κατά την υποβολή της απάντησης.");
         }
-
-        const newReply = await response.json();
-        addReplyToDom(postId, newReply);
       } catch (error) {
         console.error("Error:", error);
         alert("Παρουσιάστηκε σφάλμα κατά την υποβολή της απάντησης.");
       }
     }
 
-
-
-
-    // Νέα συνάρτηση για την υποβολή εμπειρίας χωρίς περιορισμούς
-    async function submitExperience() {
-      const experienceText = document.getElementById("experienceText").value;
-      const data = { type: 'experience', department: '', university: '', experience: experienceText };
+    async function submitForumPost() {
+      const department = document.getElementById('forumDepartment').value;
+      const university = document.getElementById('forumUniversity').value;
+      const experience = document.getElementById('forumExperience').value;
+      
+      if (!department || !university || !experience) {
+        alert("Παρακαλώ συμπληρώστε όλα τα πεδία.");
+        return;
+      }
+      
+      const data = { 
+        type: 'experience', 
+        department: department, 
+        university: university, 
+        experience: experience 
+      };
+      
       try {
         const response = await fetch('/api/forumPosts', {
           method: 'POST',
@@ -1095,10 +1661,49 @@
           },
           body: JSON.stringify(data)
         });
+        
         if (response.ok) {
-          alert("Η εμπειρία σας καταχωρήθηκε επιτυχώς.");
+          alert("Η εμπειρία σας καταχωρήθηκε επιτυχώς!");
+          closeForumModal();
+          showForum();
+        } else {
+          alert("Παρουσιάστηκε σφάλμα κατά την καταχώρηση.");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("Σφάλμα κατά την αποστολή της εμπειρίας.");
+      }
+    }
+
+    async function submitExperience() {
+      const experienceText = document.getElementById("experienceText").value;
+      
+      if (!experienceText) {
+        alert("Παρακαλώ συμπληρώστε την εμπειρία σας.");
+        return;
+      }
+      
+      const data = { 
+        type: 'experience', 
+        department: '', 
+        university: '', 
+        experience: experienceText 
+      };
+      
+      try {
+        const response = await fetch('/api/forumPosts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [csrfHeader]: csrfToken
+          },
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          alert("Η εμπειρία σας καταχωρήθηκε επιτυχώς!");
           closeExperienceModal();
-          loadHomeComments();
+          showForum();
         } else {
           alert("Παρουσιάστηκε σφάλμα κατά την καταχώρηση της εμπειρίας.");
         }
@@ -1108,88 +1713,15 @@
       }
     }
 
-    async function submitPhotoExperience() {
-      const caption = document.getElementById("photoCaption").value;
-      const photoFile = document.getElementById("photoFile").files[0];
-      if (!photoFile) {
-        alert("Παρακαλώ επιλέξτε μια φωτογραφία.");
-        return;
-      }
-      const formData = new FormData();
-      formData.append("caption", caption);
-      formData.append("photo", photoFile);
-      formData.append("type", "photoExperience");
-      formData.append("_csrf", csrfToken);
-      try {
-        const response = await fetch('/api/photoExperience', {
-          method: 'POST',
-          body: formData
-        });
-        if (response.ok) {
-          alert("Η φωτογραφία σας ανέβηκε επιτυχώς.");
-          closeUploadPhotoModal();
-          loadHomeComments();
-        } else {
-          alert("Παρουσιάστηκε σφάλμα κατά την ανέβασμα της φωτογραφίας.");
-        }
-      } catch (error) {
-        console.error(error);
-        alert("Σφάλμα κατά την αποστολή της φωτογραφίας.");
-      }
-    }
-
-    // Συνάρτηση για το toggle like για posts
     async function toggleLikePost(postId) {
-      const button = document.getElementById(`post-like-button-${postId}`);
-      const likeCountElement = document.getElementById(`post-like-count-${postId}`);
-      let currentLikes = parseInt(likeCountElement.innerText.replace('Likes: ', '')) || 0;
-      if (!button.classList.contains("liked")) {
-        try {
-          const response = await fetch(`/forum/like?postId=${postId}`, {
-            method: 'POST',
-            headers: { [csrfHeader]: csrfToken }
-          });
-          if (response.ok) {
-            button.classList.add("liked");
-            likeCountElement.innerText = `Likes: ${currentLikes + 1}`;
-          } else {
-            alert('Παρουσιάστηκε σφάλμα κατά το Like.');
-          }
-        } catch (error) {
-          console.error(error);
-          alert('Αποτυχία σύνδεσης για το Like.');
-        }
-      } else {
-        try {
-          const response = await fetch(`/forum/unlike?postId=${postId}`, {
-            method: 'POST',
-            headers: { [csrfHeader]: csrfToken }
-          });
-          if (response.ok) {
-            button.classList.remove("liked");
-            likeCountElement.innerText = `Likes: ${Math.max(currentLikes - 1, 0)}`;
-          } else {
-            alert('Παρουσιάστηκε σφάλμα κατά την αφαίρεση του Like.');
-          }
-        } catch (error) {
-          console.error(error);
-          alert('Αποτυχία σύνδεσης για το Unlike.');
-        }
-      }
-    }
-
-    async function likeReply(replyId) {
       try {
-        const response = await fetch(`/api/replies/${replyId}/like`, {
+        const response = await fetch(`/forum/like?postId=${postId}`, {
           method: 'POST',
           headers: { [csrfHeader]: csrfToken }
         });
+        
         if (response.ok) {
-          const likeCountElement = document.getElementById(`reply-like-count-${replyId}`);
-          if (likeCountElement) {
-            const currentLikes = parseInt(likeCountElement.innerText.replace('Likes: ', '')) || 0;
-            likeCountElement.innerText = `Likes: ${currentLikes + 1}`;
-          }
+          showForum(); // Ανανέωση για να δείξει το νέο like count
         } else {
           alert('Παρουσιάστηκε σφάλμα κατά το Like.');
         }
@@ -1199,150 +1731,88 @@
       }
     }
 
-    // Συνάρτηση για το άνοιγμα του modal της εμπειρίας
-    function openExperienceModal() {
-      const modal = document.getElementById("experienceModal");
-      const overlay = document.getElementById("experienceModalOverlay");
-      modal.style.display = "block";
-      overlay.style.display = "block";
-      setTimeout(() => {
-        modal.style.opacity = "1";
-        modal.style.transform = "translate(-50%, -50%) scale(1)";
-        overlay.style.opacity = "1";
-      }, 10);
-    }
-
-    function closeExperienceModal() {
-      document.getElementById("experienceModal").style.display = "none";
-      document.getElementById("experienceModalOverlay").style.display = "none";
-    }
-
-    // Παλιές συναρτήσεις για το Forum Modal
-    function openForumModal() {
-      const modal = document.getElementById("forumModal");
-      const overlay = document.getElementById("forumModalOverlay");
-      modal.style.display = "block";
-      overlay.style.display = "block";
-      // Με ένα μικρό timeout για να ενεργοποιηθούν οι μεταβάσεις
-      setTimeout(() => {
-        modal.style.opacity = "1";
-        modal.style.transform = "translate(-50%, -50%) scale(1)";
-        overlay.style.opacity = "1";
-      }, 10);
-    }
-
-    function closeForumModal() {
-      document.getElementById("forumModal").style.display = "none";
-      document.getElementById("forumModalOverlay").style.display = "none";
-    }
-
-    function openUploadPhotoModal() {
-      const modal = document.getElementById("uploadPhotoModal");
-      const overlay = document.getElementById("uploadPhotoModalOverlay");
-
-      modal.style.display = "block";
-      overlay.style.display = "block";
-
-      // Για smooth εμφάνιση:
-      setTimeout(() => {
-        modal.style.opacity = "1";
-        modal.style.transform = "translate(-50%, -50%) scale(1)";
-        overlay.style.opacity = "1";
-      }, 10);
-    }
-
-    function closeUploadPhotoModal() {
-      const modal = document.getElementById("uploadPhotoModal");
-      const overlay = document.getElementById("uploadPhotoModalOverlay");
-
-      // Αντίστροφο fade out:
-      modal.style.opacity = "0";
-      modal.style.transform = "translate(-50%, -50%) scale(0.9)";
-      overlay.style.opacity = "0";
-
-      // Μετά από 300ms, κρύβουμε το display
-      setTimeout(() => {
-        modal.style.display = "none";
-        overlay.style.display = "none";
-      }, 300);
-    }
-
-    
     async function loadHomeComments() {
       try {
         const response = await fetch('/api/forumPosts');
-        const posts = await response.json();
-        let html = '<table class="comment-table" id="homeCommentTable">';
-        html += '<thead><tr><th>Σχόλιο</th></tr></thead><tbody>';
-        if (posts.length === 0) {
-          html += '<tr><td>Δεν υπάρχουν σχόλια ακόμη.</td></tr>';
-        } else {
-          posts.forEach(post => {
-            html += `<tr><td><strong>${post.username}</strong> - ${new Date(post.timestamp).toLocaleString()}<br>${post.experience}</td></tr>`;
-          });
+        
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
-        html += '</tbody></table>';
-        document.getElementById("studentComments").innerHTML = html;
+        
+        const posts = await response.json();
+        displayHomeComments(posts);
       } catch (error) {
         console.error("Σφάλμα φόρτωσης σχολίων:", error);
         document.getElementById("studentComments").innerHTML = '<p>Σφάλμα φόρτωσης σχολίων.</p>';
       }
     }
 
+    function displayHomeComments(posts) {
+      const studentComments = document.getElementById("studentComments");
+      let html = '';
+      
+      // Εμφάνιση των 3 πιο πρόσφατων posts
+      const recentPosts = posts.slice(0, 3);
+      
+      if (recentPosts.length === 0) {
+        html = '<p>Δεν υπάρχουν σχόλια ακόμη.</p>';
+      } else {
+        recentPosts.forEach(post => {
+          html += `
+            <div class="forum-post">
+              <div class="post-header">
+                <div class="post-author">
+                  <div class="post-avatar">${post.username ? post.username.charAt(0) : 'U'}</div>
+                  <div>
+                    <strong>${post.username || 'Άγνωστος χρήστης'}</strong>
+                    <div style="font-size: 0.8rem; color: var(--gray);">${new Date(post.timestamp).toLocaleDateString('el-GR')}</div>
+                  </div>
+                </div>
+              </div>
+              <h4 class="post-title">${post.title || 'Εμπειρία Erasmus'}</h4>
+              <p>${post.body || post.experience || 'Χωρίς περιεχόμενο'}</p>
+            </div>
+          `;
+        });
+      }
+      
+      studentComments.innerHTML = html;
+    }
+
+    // Βοηθητικές συναρτήσεις
+    function showCommentsInInfoModal() {
+      alert("Σύντομα θα εμφανιστούν τα σχόλια για το πανεπιστήμιο: " + selectedUniversity);
+      // Εδώ θα πρέπει να καλείται το αντίστοιχο endpoint για τα σχόλια
+    }
+
     function openCoursesPage() {
       window.location.href = "/courses?university=" + encodeURIComponent(selectedUniversity);
     }
-    
-    function toggleSidebar() {
-      const sidebar = document.getElementById("mySidebar");
-      if (sidebar.style.width === "320px") {
-        sidebar.style.width = "0";
-      } else {
-        sidebar.style.width = "320px";
-      }
-    }
-    
-    function openProfileModal() {
-      const modal = document.getElementById("profileModal");
-      const overlay = document.getElementById("profileModalOverlay");
-      modal.style.display = "block";
-      overlay.style.display = "block";
-      setTimeout(() => {
-        modal.style.opacity = "1";
-        modal.style.transform = "translate(-50%, -50%) scale(1)";
-        overlay.style.opacity = "1";
-      }, 10);
-    }
 
-
-    function closeProfileModal() {
-      document.getElementById("profileModal").style.display = "none";
-      document.getElementById("profileModalOverlay").style.display = "none";
-    }
     function saveProfile() {
       const firstName = document.getElementById("profileFirstName").value;
       const lastName = document.getElementById("profileLastName").value;
       const department = document.getElementById("profileDepartment").value;
       const year = document.getElementById("profileYear").value;
-      alert("Όνομα: " + firstName + "\nΕπίθετο: " + lastName + "\nΤμήμα: " + department + "\nΈτος Φοίτησης: " + year);
+      
+      alert("Το προφίλ σας αποθηκεύτηκε επιτυχώς!\n\nΌνομα: " + firstName + "\nΕπίθετο: " + lastName + "\nΤμήμα: " + department + "\nΈτος Φοίτησης: " + year);
       closeProfileModal();
     }
-    
+
     function redirectToDeclarations() {
-      window.location.href = "/declarations";
+      alert("Σύντομα θα μεταφερθείτε στις δηλώσεις σας.");
+      // window.location.href = "/declarations";
     }
+
     function redirectToSettings() {
-      window.location.href = "/settings";
+      alert("Σύντομα θα μεταφερθείτε στις ρυθμίσεις.");
+      // window.location.href = "/settings";
     }
+
     function signOut() {
-      window.location.href = "/login";
-    }
-    
-    function showApplication() {
-      document.getElementById("content").innerHTML = `
-        <h2>Φτιάξε την αίτησή σου</h2>
-        <p>Εδώ μπορείτε να δημιουργήσετε την αίτησή σας για το πρόγραμμα Erasmus.</p>
-      `;
+      if (confirm("Είστε σίγουρος ότι θέλετε να αποσυνδεθείτε;")) {
+        window.location.href = "/login";
+      }
     }
   </script>
 </body>
